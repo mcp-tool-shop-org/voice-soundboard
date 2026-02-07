@@ -1,6 +1,6 @@
 [project]
 name = "voice-soundboard"
-version = "2.1.0"
+version = "2.4.0-alpha.1"
 description = "Text-to-speech for AI agents and developers. Compiler → Graph → Engine architecture."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -48,6 +48,28 @@ coqui = [
 cloning = [
     "resemblyzer>=0.1.1",
 ]
+# v2.4: New backend dependencies
+elevenlabs = [
+    "elevenlabs>=1.0.0",
+]
+azure = [
+    "azure-cognitiveservices-speech>=1.35.0",
+]
+# v2.4: Production security dependencies
+security = [
+    "restrictedpython>=7.0",
+]
+# v2.4: Distributed synthesis dependencies
+distributed = [
+    "redis>=5.0.0",
+    "grpcio>=1.60.0",
+    "prometheus-client>=0.19.0",
+]
+# v2.4: Audio intelligence dependencies
+intelligence = [
+    "transformers>=4.35.0",
+    "torch>=2.0.0",
+]
 dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
@@ -62,6 +84,15 @@ all = [
     "openai>=1.0.0",
     "TTS>=0.21.0",
     "resemblyzer>=0.1.1",
+    # v2.4 additions
+    "elevenlabs>=1.0.0",
+    "azure-cognitiveservices-speech>=1.35.0",
+    "restrictedpython>=7.0",
+    "redis>=5.0.0",
+    "grpcio>=1.60.0",
+    "prometheus-client>=0.19.0",
+    "transformers>=4.35.0",
+    "torch>=2.0.0",
 ]
 
 [project.scripts]

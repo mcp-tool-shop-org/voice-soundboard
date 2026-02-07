@@ -1,5 +1,5 @@
 """
-Voice Soundboard v2.1 - Text-to-speech for AI agents and developers.
+Voice Soundboard v2.4 - Text-to-speech for AI agents and developers.
 
 Architecture:
     Compiler → ControlGraph → Engine → PCM
@@ -9,6 +9,26 @@ Public API (stable):
     SpeechResult    - Returned by .speak(). Contains .audio_path and metadata.
     Config          - Engine configuration.
     quick_speak     - One-liner: quick_speak("Hello") -> Path
+
+v2.4 Features (new - Production Scale & Audio Intelligence):
+    security        - Plugin sandbox, input validation, audit logging, rate limiting
+    intelligence    - Emotion detection, adaptive pacing, smart silence
+    serverless      - AWS Lambda, GCP Functions, Azure Functions handlers
+    distributed     - Cluster management, model sharding, job queuing
+    analytics       - Usage tracking, quality monitoring, cost attribution
+    scenes          - Multi-layer audio scene composition
+    ambiance        - Procedural background audio generation
+    spatial         - 3D spatial audio positioning and mixing
+    testing         - VoiceMock, AudioAssertions, test fixtures
+    backends        - ElevenLabs and Azure Neural TTS support
+
+v2.3 Features:
+    realtime        - Real-time streaming engine with <20ms buffering
+    plugins         - Plugin architecture for backends, audio effects, compilers
+    monitoring      - Production observability: health checks, metrics, logging
+    conversation    - Multi-speaker dialogue support with turn management
+    quality         - Voice quality metrics and A/B comparison tools
+    formats         - Audio format conversion, sample rate, LUFS normalization
 
 v2.1 Features:
     streaming       - IncrementalSynthesizer for word-by-word streaming
@@ -29,6 +49,68 @@ Example:
     result = engine.speak("Hello world!", voice="af_bella")
     print(result.audio_path)
     
+    # v2.4: Security - Plugin sandboxing
+    from voice_soundboard.security import PluginSandbox
+    sandbox = PluginSandbox()
+    sandbox.execute_safe(plugin_code)
+    
+    # v2.4: Intelligence - Emotion detection
+    from voice_soundboard.intelligence import EmotionDetector
+    detector = EmotionDetector()
+    emotion = detector.detect("I am so happy!")
+    
+    # v2.4: Serverless deployment
+    from voice_soundboard.serverless import create_lambda_handler
+    handler = create_lambda_handler(engine)
+    
+    # v2.4: Distributed synthesis
+    from voice_soundboard.distributed import SynthesisCluster
+    cluster = SynthesisCluster(nodes=["node1:8080", "node2:8080"])
+    result = await cluster.synthesize(text)
+    
+    # v2.4: Analytics
+    from voice_soundboard.analytics import UsageTracker, CostTracker
+    tracker = UsageTracker(backend="prometheus")
+    
+    # v2.4: Scene composition
+    from voice_soundboard.scenes import SceneBuilder
+    scene = SceneBuilder("Podcast").set_music(music).add_speech(speech).build()
+    
+    # v2.4: Spatial audio
+    from voice_soundboard.spatial import SpatialMixer, SpatialPosition
+    mixer = SpatialMixer()
+    stereo = mixer.position(mono, SpatialPosition.left(2.0))
+    
+    # v2.4: Testing utilities
+    from voice_soundboard.testing import VoiceMock, AudioAssertions
+    mock = VoiceMock()
+    assertions = AudioAssertions(audio).assert_no_clipping()
+    
+    # v2.3: Real-time streaming
+    from voice_soundboard.realtime import RealtimeEngine
+    rt_engine = RealtimeEngine(backend)
+    session = rt_engine.create_session()
+    session.submit("Hello world!")
+    for chunk in session.stream():
+        play(chunk)
+    
+    # v2.3: Plugins
+    from voice_soundboard.plugins import PluginRegistry
+    registry = PluginRegistry()
+    registry.discover("./my_plugins")
+    
+    # v2.3: Multi-speaker conversation
+    from voice_soundboard.conversation import Conversation, Speaker
+    conv = Conversation(speakers=[Speaker("Alice"), Speaker("Bob")])
+    conv.add_turn("Alice", "Hello!")
+    conv.add_turn("Bob", "Hi there!")
+    audio = conv.synthesize(engine)
+    
+    # v2.3: Quality metrics
+    from voice_soundboard.quality import evaluate_pronunciation, ab_test
+    score = evaluate_pronunciation(audio, "Hello world")
+    print(f"Quality: {score.level}")
+
     # v2.1: Incremental streaming
     from voice_soundboard.streaming import IncrementalSynthesizer
     synth = IncrementalSynthesizer(backend)
@@ -41,7 +123,7 @@ Example:
     print(result.debug_info)
 """
 
-__version__ = "2.1.0"
+__version__ = "2.4.0-alpha.1"
 API_VERSION = 2
 
 # Public API - backwards compatible with v1
@@ -73,3 +155,22 @@ __all__ = [
     # v2.1
     "batch_synthesize",
 ]
+
+# v2.4 Submodules (lazy import for performance)
+# Security: from voice_soundboard.security import PluginSandbox, InputValidator, AuditLogger
+# Intelligence: from voice_soundboard.intelligence import EmotionDetector, AdaptivePacer
+# Serverless: from voice_soundboard.serverless import create_lambda_handler, create_cloud_function_handler
+# Distributed: from voice_soundboard.distributed import SynthesisCluster, SynthesisQueue
+# Analytics: from voice_soundboard.analytics import UsageTracker, QualityMonitor, CostTracker
+# Scenes: from voice_soundboard.scenes import Scene, SceneBuilder, SceneMixer
+# Ambiance: from voice_soundboard.ambiance import AmbianceGenerator, get_preset
+# Spatial: from voice_soundboard.spatial import SpatialMixer, SpatialPosition, SpatialScene
+# Testing: from voice_soundboard.testing import VoiceMock, AudioAssertions
+
+# v2.3 Submodules (lazy import for performance)
+# Import with: from voice_soundboard.realtime import RealtimeEngine
+# Import with: from voice_soundboard.plugins import PluginRegistry
+# Import with: from voice_soundboard.monitoring import HealthCheck, MetricsCollector
+# Import with: from voice_soundboard.conversation import Conversation, Speaker
+# Import with: from voice_soundboard.quality import evaluate_pronunciation, ab_test
+# Import with: from voice_soundboard.formats import convert_sample_rate, normalize_loudness

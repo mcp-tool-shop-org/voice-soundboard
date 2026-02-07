@@ -5,6 +5,121 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0-alpha.1] - 2026-XX-XX
+
+### Overview
+
+**Production Scale & Audio Intelligence** - The final bridge release before v3.
+
+v2.4 adds enterprise-grade security, cloud deployment infrastructure, audio intelligence
+features, and production observability tools. No breaking changes from v2.3.
+
+### Added
+
+#### Security (P0)
+- **Plugin Sandbox** - RestrictedPython-based isolation for plugin execution
+  - Resource monitoring (memory, CPU limits)
+  - Restricted globals (no file I/O, network, or os access)
+  - Configurable timeout protection
+- **Input Validation** - SSML injection prevention
+  - Tag whitelisting (break, prosody, say-as, phoneme, etc.)
+  - Attribute validation
+  - Text length limits
+- **Audit Logging** - Security event tracking
+  - Structured events with context
+  - File and custom backends
+  - Tamper detection
+- **Rate Limiting** - Token bucket and sliding window algorithms
+  - Per-user, per-IP, per-API-key limiting
+  - Redis or in-memory backends
+- **Secret Management** - Secure API key handling
+  - Environment variable backend
+  - Memory-only storage option
+
+#### Audio Intelligence (P1)
+- **Emotion Detection** - Text emotion analysis
+  - Transformer-based detection (optional)
+  - Keyword-based fallback
+  - Six emotion categories with prosody mapping
+- **Adaptive Pacing** - Content-aware speed adjustment
+  - Different rates for titles, code, definitions, stories
+  - Automatic content type detection
+- **Smart Silence** - Semantic pause insertion
+  - Paragraph, sentence, clause, emphasis pauses
+  - Configurable duration ranges
+
+#### Deployment Infrastructure (P0)
+- **Serverless Handlers** - Cloud function deployment
+  - AWS Lambda with S3 and CloudWatch integration
+  - GCP Cloud Functions with GCS integration
+  - Azure Functions with Blob Storage and App Insights
+  - Provider-agnostic base handler
+- **Distributed Synthesis** - Horizontal scaling
+  - `SynthesisCluster` with load balancing (round-robin, least-loaded, random)
+  - Health checking and automatic failover
+  - `ModelShard` for multi-GPU model distribution
+  - `SynthesisQueue` with Redis or in-memory backends
+
+#### Analytics (P3)
+- **Usage Tracking** - Request and usage analytics
+  - Per-voice, per-client, per-backend metrics
+  - Prometheus export support
+  - Latency percentiles (p50, p95, p99)
+- **Quality Monitoring** - Voice quality tracking
+  - Pronunciation, naturalness, timing scores
+  - Regression detection
+  - Alert notifications
+- **Cost Attribution** - Backend cost tracking
+  - Per-character pricing by backend
+  - Client cost attribution
+  - Usage forecasting
+
+#### Advanced Audio (P2)
+- **Scene Composition** - Multi-layer audio scenes
+  - Speech, music, ambiance, effect layers
+  - Per-layer volume, pan, timing, fades
+  - `SceneBuilder` fluent API for podcasts/audiobooks
+  - `SceneMixer` with music ducking
+- **Procedural Ambiance** - Background audio generation
+  - 18+ presets (rain, cafe, office, forest, etc.)
+  - Noise types: white, pink, brown, blue
+  - Volume modulation and seamless looping
+- **Spatial Audio** - 3D positioning
+  - HRTF-based spatialization (ITD/ILD)
+  - Distance attenuation models
+  - `SpatialScene` for multi-source positioning
+  - Animation keyframes for moving sources
+
+#### Backend Ecosystem (P2)
+- **ElevenLabs Backend** - Premium cloud TTS
+  - Ultra-realistic voice synthesis
+  - Voice cloning support
+  - Emotion/style control via stability/similarity
+  - Streaming support
+- **Azure Neural TTS Backend** - Microsoft Azure integration
+  - Neural TTS with 50+ voices
+  - SSML with speaking styles
+  - Style selection (cheerful, sad, angry, etc.)
+
+#### Developer Tools (P3)
+- **Testing Utilities** - Test helpers
+  - `VoiceMock` - Configurable mock backend
+  - `AudioAssertions` - Audio quality assertions
+  - `AudioBuilder` - Fluent test audio creation
+  - Sample texts and fixtures
+
+### Changed
+- Version bumped to 2.4.0-alpha.1
+- Added optional dependencies: elevenlabs, azure-cognitiveservices-speech, 
+  restrictedpython, redis, grpcio, prometheus-client, transformers, torch
+
+### Unchanged (Public API Compatibility)
+- `VoiceEngine.speak()` - same signature
+- `SpeechResult` - same fields
+- All v2.3 features remain fully compatible
+
+---
+
 ## [2.0.0] - 2026-02-07
 
 ### Overview
