@@ -7,6 +7,7 @@ from voice_soundboard.graph import (
     TokenEvent,
     SpeakerRef,
     Paralinguistic,
+    ParalinguisticEvent,
 )
 
 
@@ -131,6 +132,93 @@ class TestControlGraph:
         graph = ControlGraph(
             tokens=[TokenEvent(text="Hello world!")],
             speaker=SpeakerRef.from_voice("af_bella"),
+        )
+        issues = graph.validate()
+        assert issues == []
+
+
+class TestParalinguisticEvent:
+    """Tests for ParalinguisticEvent."""
+    
+    def test_basic_event(self):
+        event = ParalinguisticEvent(
+            type=Paralinguistic.LAUGH,
+            start_time=0.0,
+        )
+        assert event.type == Paralinguistic.LAUGH
+        assert event.start_time == 0.0
+        assert event.duration == 0.2  # Default
+        assert event.intensity == 1.0  # Default
+    
+    def test_end_time_property(self):
+        event = ParalinguisticEvent(
+            type=Paralinguistic.SIGH,
+            start_time=1.0,
+            duration=0.5,
+        )
+        assert event.end_time == 1.5
+    
+    def test_intensity_range(self):
+        event = ParalinguisticEvent(
+            type=Paralinguistic.BREATH,
+            start_time=0.0,
+            intensity=0.5,
+        )
+        assert event.intensity == 0.5
+
+
+class TestControlGraphEvents:
+    """Tests for ControlGraph with paralinguistic events."""
+    
+    def test_graph_with_events(self):
+        graph = ControlGraph(
+            tokens=[TokenEvent(text="Hello!")],
+            speaker=SpeakerRef.from_voice("af_bella"),
+            events=[
+                ParalinguisticEvent(Paralinguistic.LAUGH, start_time=0.0),
+            ],
+        )
+        assert len(graph.events) == 1
+        assert graph.events[0].type == Paralinguistic.LAUGH
+    
+    def test_validate_event_negative_start(self):
+        graph = ControlGraph(
+            tokens=[TokenEvent(text="Hi")],
+            speaker=SpeakerRef.from_voice("af_bella"),
+            events=[ParalinguisticEvent(Paralinguistic.SIGH, start_time=-1.0)],
+        )
+        issues = graph.validate()
+        assert any("negative start_time" in issue for issue in issues)
+    
+    def test_validate_event_invalid_duration(self):
+        graph = ControlGraph(
+            tokens=[TokenEvent(text="Hi")],
+            speaker=SpeakerRef.from_voice("af_bella"),
+            events=[ParalinguisticEvent(Paralinguistic.SIGH, start_time=0.0, duration=0.0)],
+        )
+        issues = graph.validate()
+        assert any("invalid duration" in issue for issue in issues)
+    
+    def test_validate_overlapping_events(self):
+        graph = ControlGraph(
+            tokens=[TokenEvent(text="Hi")],
+            speaker=SpeakerRef.from_voice("af_bella"),
+            events=[
+                ParalinguisticEvent(Paralinguistic.LAUGH, start_time=0.0, duration=0.5),
+                ParalinguisticEvent(Paralinguistic.SIGH, start_time=0.2, duration=0.5),
+            ],
+        )
+        issues = graph.validate()
+        assert any("overlap" in issue for issue in issues)
+    
+    def test_validate_non_overlapping_events(self):
+        graph = ControlGraph(
+            tokens=[TokenEvent(text="Hi")],
+            speaker=SpeakerRef.from_voice("af_bella"),
+            events=[
+                ParalinguisticEvent(Paralinguistic.LAUGH, start_time=0.0, duration=0.2),
+                ParalinguisticEvent(Paralinguistic.SIGH, start_time=0.5, duration=0.2),
+            ],
         )
         issues = graph.validate()
         assert issues == []

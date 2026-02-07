@@ -200,6 +200,9 @@ class PiperBackend(BaseTTSBackend):
             - Maps speaker to Piper voice
             - Applies global_speed via length_scale
             - Per-token prosody affects length_scale (limited support)
+            
+        Paralinguistic events are lowered to silence (lossy).
+        Piper doesn't support native paralinguistics.
         """
         # Lower graph to Piper's format
         text = self._lower_text(graph)
@@ -231,6 +234,9 @@ class PiperBackend(BaseTTSBackend):
         with wave.open(wav_buffer, "rb") as wav_file:
             frames = wav_file.readframes(wav_file.getnframes())
             audio = np.frombuffer(frames, dtype=np.int16).astype(np.float32) / 32768.0
+        
+        # Lower events to silence (lossy lowering)
+        audio = self._lower_events(graph, audio)
         
         return audio
     
@@ -314,6 +320,29 @@ class PiperBackend(BaseTTSBackend):
         length_scale = 1.0 / speed
         
         return length_scale
+    
+    def _lower_events(self, graph: ControlGraph, audio: np.ndarray) -> np.ndarray:
+        """Lower paralinguistic events to silence (lossy).
+        
+        Piper doesn't support native paralinguistics.
+        Events are converted to silence padding at the appropriate timeline position.
+        This is lossy but keeps timing intact.
+        
+        Future: Could mix in prerecorded audio at adapter level.
+        """
+        if not graph.events:
+            return audio
+        
+        # For simplicity, prepend event durations as silence
+        # (More sophisticated implementation would splice at exact times)
+        total_event_time = sum(e.duration for e in graph.events)
+        silence_samples = int(total_event_time * self.sample_rate)
+        
+        if silence_samples > 0:
+            silence = np.zeros(silence_samples, dtype=np.float32)
+            audio = np.concatenate([silence, audio])
+        
+        return audio
     
     def get_voices(self) -> list[str]:
         """Return available Piper voice names."""

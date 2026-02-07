@@ -48,6 +48,38 @@ class Paralinguistic(str, Enum):
 
 
 @dataclass
+class ParalinguisticEvent:
+    """A time-bound non-speech event on the timeline.
+    
+    IMPORTANT: Events are NOT tokens. They occupy timeline positions
+    and must never overlap with tokens. This distinction is critical:
+    
+        Tokens = speech content with prosody
+        Events = non-speech sounds at specific times
+    
+    Backends lower these differently:
+        - Chatterbox: native tags (<laugh intensity="0.8"/>)
+        - Piper: silence + prosody shaping (lossy)
+        - Kokoro: special token IDs or energy curves
+        - F5-TTS: embedding modulation
+    
+    Lossy lowering is acceptable. Unsupported events become pauses.
+    """
+    type: Paralinguistic
+    
+    # Timeline position (seconds from graph start)
+    start_time: float
+    duration: float = 0.2  # Default 200ms
+    
+    # Intensity/expressiveness (0.0-1.0, backends interpret freely)
+    intensity: float = 1.0
+    
+    @property
+    def end_time(self) -> float:
+        return self.start_time + self.duration
+
+
+@dataclass
 class TokenEvent:
     """Single unit of speech intent.
     
@@ -124,15 +156,28 @@ class ControlGraph:
     All SSML, emotion, style interpretation happens BEFORE this object exists.
     After compilation, those concepts are gone - only data remains.
     
+    Timeline Model:
+        The graph has two parallel tracks:
+        1. tokens: Sequential speech content
+        2. events: Time-positioned non-speech events (laughs, sighs, etc.)
+        
+        INVARIANT: Events must not overlap with tokens.
+        Events may precede, follow, or fill pauses between tokens.
+        This keeps lowering deterministic across backends.
+    
     Example:
         graph = ControlGraph(
             tokens=[TokenEvent(text="Hello world!")],
             speaker=SpeakerRef.from_voice("af_bella"),
+            events=[ParalinguisticEvent(Paralinguistic.LAUGH, start_time=0.0)],
         )
         pcm = engine.synthesize(graph)
     """
     tokens: list[TokenEvent]
     speaker: SpeakerRef
+    
+    # Timeline events (paralinguistics, non-speech sounds)
+    events: list[ParalinguisticEvent] = field(default_factory=list)
     
     # Global prosody (applied on top of per-token modifiers)
     global_speed: float = 1.0
@@ -163,6 +208,20 @@ class ControlGraph:
         
         if self.global_speed <= 0:
             issues.append(f"Invalid global_speed: {self.global_speed}")
+        
+        # Validate events don't overlap (events have explicit times)
+        for i, event in enumerate(self.events):
+            if event.start_time < 0:
+                issues.append(f"Event {i} has negative start_time: {event.start_time}")
+            if event.duration <= 0:
+                issues.append(f"Event {i} has invalid duration: {event.duration}")
+            if not 0.0 <= event.intensity <= 1.0:
+                issues.append(f"Event {i} has invalid intensity: {event.intensity}")
+            
+            # Check for overlapping events
+            for j, other in enumerate(self.events[i+1:], start=i+1):
+                if event.start_time < other.end_time and other.start_time < event.end_time:
+                    issues.append(f"Events {i} and {j} overlap")
         
         if self.global_pitch <= 0:
             issues.append(f"Invalid global_pitch: {self.global_pitch}")

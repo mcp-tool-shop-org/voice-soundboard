@@ -12,6 +12,7 @@ from voice_soundboard.graph.types import (
     TokenEvent,
     SpeakerRef,
     Paralinguistic,
+    ParalinguisticEvent,
 )
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "TokenEvent",
     "SpeakerRef",
     "Paralinguistic",
+    "ParalinguisticEvent",
 ]

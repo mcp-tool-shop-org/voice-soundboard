@@ -39,12 +39,16 @@ class MockBackend(BaseTTSBackend):
         """Generate mock audio.
         
         Duration is estimated at ~150ms per word.
+        Paralinguistic events add their duration to the total.
         """
         # Estimate duration: ~150ms per word, adjusted by speed
         word_count = sum(len(t.text.split()) for t in graph.tokens)
         pause_time = sum(t.pause_after for t in graph.tokens)
         
-        duration = (word_count * 0.15 + pause_time) / graph.global_speed
+        # Add event durations (events are lowered to silence in mock)
+        event_time = sum(e.duration for e in graph.events)
+        
+        duration = (word_count * 0.15 + pause_time + event_time) / graph.global_speed
         num_samples = int(duration * self.sample_rate)
         
         if self._silence:
