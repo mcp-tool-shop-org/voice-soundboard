@@ -10,6 +10,13 @@ v3.1 adds operational hardening:
 - graph.visualize() for introspection
 - DSP presets and profiles
 - Plugin interface
+
+v3.2 adds spatial audio:
+- Listener-centric spatialization
+- Binaural HRTF rendering
+- Explicit spatial → stereo downmix
+- Movement/automation system
+- Spatial safety invariants
 """
 
 from voice_soundboard.v3.audio_graph import (
@@ -33,6 +40,31 @@ from voice_soundboard.v3.plugins import (
     PluginContext,
     PluginCategory,
 )
+from voice_soundboard.v3.spatial import (
+    # Coordinates
+    Position3D,
+    Orientation3D,
+    # Nodes
+    SpatialNode,
+    SpatialNodeType,
+    ListenerNode,
+    SpatialDownmixNode,
+    # HRTF
+    HRTFProfile,
+    HRTFParameters,
+    HRTFEngine,
+    # Movement
+    InterpolationMode,
+    MovementKeyframe,
+    MovementPath,
+    # Graph
+    SpatialGraph,
+    SpatialGraphValidation,
+    create_spatial_scene,
+    # Safety
+    SpatialSafetyLimits,
+    validate_spatial_safety,
+)
 
 __all__ = [
     # AudioGraph
@@ -52,6 +84,24 @@ __all__ = [
     "AudioPlugin",
     "PluginContext",
     "PluginCategory",
+    # Spatial (v3.2)
+    "Position3D",
+    "Orientation3D",
+    "SpatialNode",
+    "SpatialNodeType",
+    "ListenerNode",
+    "SpatialDownmixNode",
+    "HRTFProfile",
+    "HRTFParameters",
+    "HRTFEngine",
+    "InterpolationMode",
+    "MovementKeyframe",
+    "MovementPath",
+    "SpatialGraph",
+    "SpatialGraphValidation",
+    "create_spatial_scene",
+    "SpatialSafetyLimits",
+    "validate_spatial_safety",
 ]
 
-__version__ = "3.1.0-alpha"
+__version__ = "3.2.0-alpha"
