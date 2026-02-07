@@ -1,6 +1,7 @@
 {
   "sample_rate": 24000,
   "description": "Audio event assets for paralinguistic sounds. See docs/audio_events.md for spec.",
+  "_template_note": "This manifest is a TEMPLATE. WAV files must be created separately. CI skips validation until WAVs exist.",
   "events": {
     "laugh": {
       "variants": [

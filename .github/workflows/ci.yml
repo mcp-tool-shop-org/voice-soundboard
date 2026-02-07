@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      
+      - name: Run tests
+        run: |
+          python -m pytest tests/ -v --tb=short
+      
+      - name: Check architecture invariants
+        run: |
+          # Verify engine doesn't import from compiler
+          python -c "
+          import ast
+          import sys
+          from pathlib import Path
+          
+          engine_files = list(Path('voice_soundboard/engine').rglob('*.py'))
+          
+          for f in engine_files:
+              tree = ast.parse(f.read_text())
+              for node in ast.walk(tree):
+                  if isinstance(node, (ast.Import, ast.ImportFrom)):
+                      module = getattr(node, 'module', '') or ''
+                      names = [a.name for a in getattr(node, 'names', [])]
+                      for name in [module] + names:
+                          if 'compiler' in name:
+                              print(f'ERROR: {f} imports from compiler: {name}')
+                              sys.exit(1)
+          
+          print('✅ Architecture invariant verified: engine does not import compiler')
+          "
+
+  validate-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      
+      - name: Validate audio event assets
+        run: |
+          # Only validate if actual WAV files exist (not just manifest template)
+          if [ -f "assets/audio_events/manifest.json" ] && \
+             [ -n "$(find assets/audio_events -name '*.wav' 2>/dev/null)" ]; then
+            python tools/validate_audio_events.py
+          else
+            echo "Skipping asset validation (no WAV files found - manifest is template only)"
+          fi
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+      
+      - name: Lint with ruff
+        run: |
+          ruff check voice_soundboard/ tests/ --ignore=E501
+        continue-on-error: true  # Don't fail CI on lint issues yet
