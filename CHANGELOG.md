@@ -5,6 +5,123 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0-alpha.1] - 2026-XX-XX
+
+### Overview
+
+**MCP Integration & Agent Interoperability** - The agent bridge release.
+
+v2.5 makes Voice Soundboard a first-class, agent-native capability through Model Context
+Protocol (MCP) integration. This release completes the control plane, enabling v3 to focus
+purely on audio capabilities. No breaking changes from v2.4.
+
+### Added
+
+#### MCP Server & Tooling (P0)
+- **MCPServer** - Embedded MCP-compliant server
+  - Tool registration and discovery
+  - WebSocket transport support
+  - Configurable concurrency limits
+  - Request timeout handling
+- **Core Tools** - Standardized agent interfaces
+  - `voice.speak` - Synthesize speech with emotion support
+  - `voice.stream` - Incremental streaming synthesis
+  - `voice.interrupt` - Stop/rollback active audio
+  - `voice.list_voices` - Enumerate available voices
+  - `voice.status` - Engine health and capabilities
+- **ToolRegistry** - Tool management and discovery
+  - Schema-driven inputs/outputs
+  - Category-based organization
+
+#### Agent-Aware Sessions (P0)
+- **MCPSession** - Session-scoped synthesis
+  - Agent ownership of streams
+  - Conversation ID tracking
+  - Stream registration and lifecycle
+- **SessionManager** - Session lifecycle management
+  - Automatic expiration cleanup
+  - Per-agent session tracking
+  - Priority-based interruption rules
+- **SessionConfig** - Configurable session behavior
+  - Timeout settings
+  - Concurrent stream limits
+  - Priority levels
+
+#### Streaming & Interrupt Semantics (P1)
+- **InterruptHandler** - Explicit interrupt handling
+  - Structured interrupt reasons (user_spoke, context_change, timeout, etc.)
+  - Graceful fade-out support
+  - Rollback point tracking
+- **InterruptEvent** - Structured interrupt events
+  - Audio played/remaining metrics
+  - Interrupt acknowledgements
+- **InterruptReason** - Standardized reason codes
+  - USER_SPOKE, CONTEXT_CHANGE, TIMEOUT, MANUAL, PRIORITY, ERROR
+
+#### Observability for Agents (P1)
+- **SynthesisMetadata** - Structured output metadata
+  - Synthesis latency
+  - Audio duration
+  - Voice and backend info
+  - Applied emotion
+  - Cost estimates
+  - Cache hit status
+- **MetadataCollector** - Metadata tracking
+  - Per-operation tracking
+  - Cost estimation with backend pricing
+  - Aggregate statistics
+- **BackendPricing** - Cost tracking for cloud backends
+
+#### Permissions & Safety (P2)
+- **MCPPolicy** - Agent permission configuration
+  - Tool-level access control
+  - Rate limiting (requests, characters, streams)
+  - Backend restrictions
+  - Text length limits
+- **PolicyEnforcer** - Policy enforcement
+  - Tool, voice, and backend access checks
+  - Rate limit enforcement
+  - Violation tracking
+- **CapabilityFlags** - Fine-grained capability control
+  - SPEAK, STREAM, INTERRUPT, LIST_VOICES, STATUS
+  - EXTERNAL_BACKENDS, EMOTION_DETECTION, VOICE_CLONING
+  - Preset levels (BASIC, STANDARD, FULL, ALL)
+
+#### MCP Testing (P2)
+- **MCPMock** - Mock MCP client for testing
+  - Response configuration
+  - Call recording
+  - Assertion helpers (assert_called, assert_called_with)
+- **MCPTestHarness** - Deterministic test harness
+  - Trace recording
+  - Trace replay
+  - File serialization
+
+### Dependencies
+
+New optional dependencies (`mcp-server` extra):
+- `mcp>=1.0.0` - Model Context Protocol
+- `pydantic>=2.0.0` - Schema validation
+- `fastapi>=0.109.0` - API framework (optional)
+- `uvicorn>=0.27.0` - ASGI server (optional)
+
+### Migration
+
+No breaking changes. MCP is fully opt-in:
+
+```python
+# Existing code works unchanged
+engine = VoiceEngine()
+result = engine.speak("Hello!")
+
+# Opt-in to MCP
+from voice_soundboard.mcp import create_mcp_server
+server = create_mcp_server(engine)
+await server.run()
+```
+
+---
+
 ## [2.4.0-alpha.1] - 2026-XX-XX
 
 ### Overview

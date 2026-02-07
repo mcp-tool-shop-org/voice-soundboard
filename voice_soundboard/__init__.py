@@ -1,5 +1,5 @@
 """
-Voice Soundboard v2.4 - Text-to-speech for AI agents and developers.
+Voice Soundboard v2.5 - Text-to-speech for AI agents and developers.
 
 Architecture:
     Compiler → ControlGraph → Engine → PCM
@@ -10,7 +10,17 @@ Public API (stable):
     Config          - Engine configuration.
     quick_speak     - One-liner: quick_speak("Hello") -> Path
 
-v2.4 Features (new - Production Scale & Audio Intelligence):
+v2.5 Features (new - MCP Integration & Agent Interoperability):
+    mcp             - Model Context Protocol integration
+                    - MCPServer, create_mcp_server: Embedded MCP server
+                    - Tools: voice.speak, voice.stream, voice.interrupt, etc.
+                    - MCPSession, SessionManager: Agent-aware sessions
+                    - InterruptHandler, InterruptReason: Explicit interrupt semantics
+                    - SynthesisMetadata, MetadataCollector: Agent observability
+                    - MCPPolicy, PolicyEnforcer: Permissions & safety
+                    - MCPMock, MCPTestHarness: Testing utilities
+
+v2.4 Features (Production Scale & Audio Intelligence):
     security        - Plugin sandbox, input validation, audit logging, rate limiting
     intelligence    - Emotion detection, adaptive pacing, smart silence
     serverless      - AWS Lambda, GCP Functions, Azure Functions handlers
@@ -48,6 +58,27 @@ Example:
     engine = VoiceEngine()
     result = engine.speak("Hello world!", voice="af_bella")
     print(result.audio_path)
+    
+    # v2.5: MCP Integration - Expose as agent tool
+    from voice_soundboard.mcp import create_mcp_server
+    server = create_mcp_server(engine)
+    await server.run()
+    
+    # v2.5: Agent calls
+    result = await server.call("voice.speak", {"text": "Hello!"})
+    
+    # v2.5: Agent sessions
+    from voice_soundboard.mcp import SessionManager
+    manager = SessionManager()
+    session = manager.create_session(agent_id="planner")
+    
+    # v2.5: Interruption
+    result = await server.call("voice.interrupt", {"reason": "user_spoke"})
+    
+    # v2.5: Policy enforcement
+    from voice_soundboard.mcp import MCPPolicy, PolicyEnforcer
+    policy = MCPPolicy(allow_tools=["voice.speak"], max_text_length=5000)
+    enforcer = PolicyEnforcer(policy)
     
     # v2.4: Security - Plugin sandboxing
     from voice_soundboard.security import PluginSandbox
@@ -123,7 +154,7 @@ Example:
     print(result.debug_info)
 """
 
-__version__ = "2.4.0-alpha.1"
+__version__ = "2.5.0-alpha.1"
 API_VERSION = 2
 
 # Public API - backwards compatible with v1

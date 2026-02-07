@@ -1,6 +1,6 @@
 [project]
 name = "voice-soundboard"
-version = "2.4.0-alpha.1"
+version = "2.5.0-alpha.1"
 description = "Text-to-speech for AI agents and developers. Compiler → Graph → Engine architecture."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -70,6 +70,13 @@ intelligence = [
     "transformers>=4.35.0",
     "torch>=2.0.0",
 ]
+# v2.5: MCP integration dependencies
+mcp-server = [
+    "mcp>=1.0.0",
+    "pydantic>=2.0.0",
+    "fastapi>=0.109.0",
+    "uvicorn>=0.27.0",
+]
 dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
@@ -93,6 +100,10 @@ all = [
     "prometheus-client>=0.19.0",
     "transformers>=4.35.0",
     "torch>=2.0.0",
+    # v2.5 additions
+    "pydantic>=2.0.0",
+    "fastapi>=0.109.0",
+    "uvicorn>=0.27.0",
 ]
 
 [project.scripts]
