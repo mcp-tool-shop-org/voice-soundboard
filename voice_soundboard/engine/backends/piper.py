@@ -69,13 +69,16 @@ PIPER_VOICES = {
     "es_MX_ald_medium": {"model": "es_MX-ald-medium", "quality": "medium"},
 }
 
-# Map Kokoro-style voice IDs to Piper voices (for compatibility)
+# Compatibility shims: Kokoro voice IDs → Piper equivalents.
+# These are BEST-EFFORT mappings, not guarantees of identical output.
+# Treat as convenience for users migrating from Kokoro backend.
+# Do not rely on these for production voice matching.
 KOKORO_TO_PIPER = {
-    "af_bella": "en_US_lessac_medium",
-    "af_jessica": "en_US_amy_medium",
-    "am_michael": "en_US_ryan_medium",
-    "bm_george": "en_GB_alan_medium",
-    "bf_emma": "en_GB_alba_medium",
+    "af_bella": "en_US_lessac_medium",      # Female US
+    "af_jessica": "en_US_amy_medium",       # Female US alt
+    "am_michael": "en_US_ryan_medium",      # Male US
+    "bm_george": "en_GB_alan_medium",       # Male GB
+    "bf_emma": "en_GB_alba_medium",         # Female GB
 }
 
 
@@ -281,10 +284,23 @@ class PiperBackend(BaseTTSBackend):
         return self._default_voice
     
     def _lower_speed(self, graph: ControlGraph) -> float:
-        """Convert speed to Piper's length_scale.
+        """Convert semantic speed to Piper's length_scale.
         
-        Piper: length_scale=2.0 means 2x slower (inverse of speed)
-        Our API: speed=2.0 means 2x faster
+        IMPORTANT: This is a backend-specific inversion.
+        
+        Semantic speed (ControlGraph):
+            speed=2.0 means "speak twice as fast"
+            speed=0.5 means "speak half as fast"
+            
+        Piper's length_scale:
+            length_scale=2.0 means "take twice as long" (slower)
+            length_scale=0.5 means "take half as long" (faster)
+            
+        Therefore: length_scale = 1.0 / speed
+        
+        This inversion is CORRECT and INTENTIONAL. Do not "fix" it.
+        Do not normalize this at the compiler level - speed is semantic,
+        length_scale is backend math.
         """
         speed = graph.global_speed
         

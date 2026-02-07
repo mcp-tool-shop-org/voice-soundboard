@@ -7,10 +7,21 @@ Engine backends lower this to their specific format.
 
 Design principle: Expressive, not minimal. Backends ignore fields they don't support.
 
-STABILITY:
-    This module defines the contract between compiler and engine.
-    GRAPH_VERSION is bumped on breaking changes to these types.
-    Treat ControlGraph like an ABI - changes here affect all backends.
+STABILITY (v1 - Frozen):
+    This schema is STABLE as of v2.0.0. It has been validated against multiple
+    backends (Kokoro, Piper) with different characteristics:
+    - Sample rates (22kHz, 24kHz)
+    - Speed semantics (multiplier vs length_scale)
+    - Voice systems (ID-based, multi-speaker)
+    
+    Changes to ControlGraph, TokenEvent, or SpeakerRef are breaking changes.
+    Bump GRAPH_VERSION if you must modify these types.
+    Treat modifications as v3 material unless absolutely necessary.
+    
+    The graph captures INTENT, not execution details:
+    - speed is semantic (2.0 = faster)
+    - sample_rate belongs to backends
+    - voice resolution is backend-specific
 """
 
 from __future__ import annotations

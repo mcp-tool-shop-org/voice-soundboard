@@ -2,7 +2,27 @@
 Engine Base - TTSBackend protocol.
 
 The engine NEVER imports from compiler. This is enforced architecturally.
-All backends implement lower_and_synthesize(graph) -> PCM.
+All backends implement synthesize(graph) -> PCM.
+
+BACKEND CONTRACT:
+    Backends MUST:
+        - Accept a ControlGraph (the canonical IR)
+        - Perform lowering internally (graph → backend-specific format)
+        - Define their own sample_rate (not normalized)
+        - Define streaming semantics (chunked vs true streaming)
+        - Return float32 PCM audio in range [-1, 1]
+    
+    Backends MUST NOT:
+        - Import from compiler/
+        - Parse SSML or interpret emotion (that's compiler work)
+        - Modify the input graph
+        - Perform voice cloning (embedding comes pre-computed)
+        - Normalize sample rates (let adapters resample if needed)
+    
+    Lowering pattern:
+        Each backend implements _lower_*() methods to map graph fields
+        to backend-specific parameters. This keeps the mapping explicit
+        and backend-contained.
 """
 
 from __future__ import annotations
