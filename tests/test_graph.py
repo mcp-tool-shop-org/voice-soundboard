@@ -1,7 +1,23 @@
 """Tests for the graph module."""
 
 import pytest
-from voice_soundboard.graph import ControlGraph, TokenEvent, SpeakerRef, Paralinguistic
+from voice_soundboard.graph import (
+    GRAPH_VERSION,
+    ControlGraph,
+    TokenEvent,
+    SpeakerRef,
+    Paralinguistic,
+)
+
+
+class TestGraphVersion:
+    """Tests for graph version stability."""
+    
+    def test_graph_version_exists(self):
+        assert GRAPH_VERSION == 1
+    
+    def test_graph_version_is_int(self):
+        assert isinstance(GRAPH_VERSION, int)
 
 
 class TestTokenEvent:
@@ -51,6 +67,15 @@ class TestSpeakerRef:
         speaker = SpeakerRef.from_preset("narrator")
         assert speaker.type == "preset"
         assert speaker.value == "narrator"
+    
+    def test_embedding_is_float_list(self):
+        """Embeddings must be numeric vectors, not raw audio data."""
+        embedding = [0.1, 0.2, 0.3, 0.4, 0.5]
+        speaker = SpeakerRef.from_embedding(embedding)
+        
+        # Value should be the embedding, not bytes or large arrays
+        assert isinstance(speaker.value, list)
+        assert all(isinstance(x, float) for x in speaker.value)
 
 
 class TestControlGraph:

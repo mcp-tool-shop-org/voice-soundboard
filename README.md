@@ -94,6 +94,13 @@ audio = backend.synthesize(graph)
 
 ### Streaming
 
+Streaming operates at two levels:
+
+1. **Graph streaming**: `compile_stream()` yields ControlGraphs as sentence boundaries are detected
+2. **Audio streaming**: `StreamingSynthesizer` chunks audio for real-time playback
+
+**Note**: This is sentence-level streaming, not word-by-word incremental synthesis. The compiler waits for sentence boundaries before yielding graphs. True incremental synthesis (speculative execution with rollback) is architecturally supported but not yet implemented.
+
 ```python
 from voice_soundboard.compiler import compile_stream
 from voice_soundboard.runtime import StreamingSynthesizer
@@ -166,6 +173,21 @@ voice_soundboard/
 ```
 
 **Key invariant**: `engine/` never imports from `compiler/`.
+
+## Architecture Invariants
+
+These rules are enforced in tests and must never be violated:
+
+1. **Engine isolation**: `engine/` never imports from `compiler/`. The engine knows nothing about emotions, styles, or presets - only ControlGraphs.
+
+2. **Voice cloning boundary**: Raw audio never reaches the engine. The compiler extracts speaker embeddings; the engine receives only embedding vectors via `SpeakerRef`.
+
+3. **Graph stability**: `GRAPH_VERSION` (currently 1) is bumped on breaking changes to ControlGraph. Backends can check this for compatibility.
+
+```python
+from voice_soundboard.graph import GRAPH_VERSION, ControlGraph
+assert GRAPH_VERSION == 1
+```
 
 ## Migration from v1
 

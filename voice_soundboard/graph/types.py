@@ -6,6 +6,11 @@ All features (emotion, SSML, style) compile down to this representation.
 Engine backends lower this to their specific format.
 
 Design principle: Expressive, not minimal. Backends ignore fields they don't support.
+
+STABILITY:
+    This module defines the contract between compiler and engine.
+    GRAPH_VERSION is bumped on breaking changes to these types.
+    Treat ControlGraph like an ABI - changes here affect all backends.
 """
 
 from __future__ import annotations
@@ -13,6 +18,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 from enum import Enum
+
+# Graph schema version. Bump on breaking changes to ControlGraph/TokenEvent/SpeakerRef.
+# Backends can check this to ensure compatibility.
+GRAPH_VERSION = 1
 
 
 class Paralinguistic(str, Enum):
@@ -58,23 +67,41 @@ class SpeakerRef:
         voice_id: A known voice identifier (e.g., "af_bella")
         embedding: A speaker embedding vector (from voice cloning)
         preset: A named preset that maps to voice + settings
+    
+    IMPORTANT - Voice Cloning Boundary:
+        This type holds EMBEDDINGS ONLY, never raw audio.
+        The compiler extracts embeddings from reference audio.
+        The engine receives only the embedding vector.
+        Raw waveforms must never cross this boundary.
+        
+        This constraint is critical for:
+        - Security (no arbitrary audio in synthesis path)
+        - Performance (embeddings are small, audio is large)
+        - Testability (embeddings are deterministic)
     """
     type: Literal["voice_id", "embedding", "preset"]
-    value: str | list[float]
+    value: str | list[float]  # voice_id/preset: str, embedding: list[float]
     
     # Metadata (for debugging/logging)
     name: str | None = None
     
     @classmethod
     def from_voice(cls, voice_id: str) -> SpeakerRef:
+        """Create reference from a known voice ID."""
         return cls(type="voice_id", value=voice_id, name=voice_id)
     
     @classmethod
     def from_embedding(cls, embedding: list[float], name: str = "cloned") -> SpeakerRef:
+        """Create reference from a speaker embedding vector.
+        
+        The embedding should be extracted by the compiler from reference audio.
+        The engine never sees the original audio - only this vector.
+        """
         return cls(type="embedding", value=embedding, name=name)
     
     @classmethod
     def from_preset(cls, preset_name: str) -> SpeakerRef:
+        """Create reference from a named preset."""
         return cls(type="preset", value=preset_name, name=preset_name)
 
 
