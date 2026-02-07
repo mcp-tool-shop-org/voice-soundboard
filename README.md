@@ -140,10 +140,11 @@ voice-soundboard emotions
 
 ## Backends
 
-| Backend | Quality | Speed | Install |
-|---------|---------|-------|---------|
-| Kokoro | ⭐⭐⭐⭐⭐ | Fast (GPU) | `pip install voice-soundboard[kokoro]` |
-| Mock | N/A | Instant | (built-in, for testing) |
+| Backend | Quality | Speed | Sample Rate | Install |
+|---------|---------|-------|-------------|---------|
+| Kokoro | ⭐⭐⭐⭐⭐ | Fast (GPU) | 24000 Hz | `pip install voice-soundboard[kokoro]` |
+| Piper | ⭐⭐⭐⭐ | Fast (CPU) | 22050 Hz | `pip install voice-soundboard[piper]` |
+| Mock | N/A | Instant | 24000 Hz | (built-in, for testing) |
 
 ### Kokoro Setup
 
@@ -154,6 +155,28 @@ pip install voice-soundboard[kokoro]
 mkdir models && cd models
 curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx
 curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+```
+
+### Piper Setup
+
+```bash
+pip install voice-soundboard[piper]
+
+# Download a voice (example: en_US_lessac_medium)
+python -m piper.download_voices en_US-lessac-medium
+```
+
+Piper features:
+- **30+ voices** across multiple languages (English, German, French, Spanish)
+- **Pure CPU** - no GPU required
+- **Speed control** via `length_scale` (inverted: 0.8 = faster, 1.2 = slower)
+- **Sample rate**: 22050 Hz (backend-specific)
+
+Voice mapping from Kokoro:
+```python
+# These Kokoro voices have Piper equivalents
+engine = VoiceEngine(Config(backend="piper"))
+result = engine.speak("Hello!", voice="af_bella")  # Uses en_US_lessac_medium
 ```
 
 ## Package Structure

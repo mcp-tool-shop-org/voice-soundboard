@@ -85,6 +85,8 @@ class TokenEvent:
     
     Represents a segment of text with prosody modifiers.
     The compiler produces these; the engine consumes them.
+    
+    FROZEN (v2.0.0): Changes to this class require GRAPH_VERSION bump.
     """
     text: str
     
@@ -105,6 +107,8 @@ class TokenEvent:
 @dataclass
 class SpeakerRef:
     """Speaker identity - resolved at compile time.
+    
+    FROZEN (v2.0.0): Changes to this class require GRAPH_VERSION bump.
     
     Types:
         voice_id: A known voice identifier (e.g., "af_bella")
@@ -151,6 +155,8 @@ class SpeakerRef:
 @dataclass
 class ControlGraph:
     """The canonical IR. Compiler emits this; engine backends consume it.
+    
+    FROZEN (v2.0.0): Changes to this class require GRAPH_VERSION bump.
     
     This is the contract between the feature layer and the synthesis layer.
     All SSML, emotion, style interpretation happens BEFORE this object exists.
