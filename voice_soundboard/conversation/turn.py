@@ -50,8 +50,8 @@ class Turn:
         action = Turn.action("alice", "laughs")
     """
     
-    speaker_id: str
-    text: str
+    speaker_id: str = ""
+    text: str = ""
     turn_type: TurnType = TurnType.SPEECH
     duration_ms: float | None = None
     start_time_ms: float | None = None
@@ -60,6 +60,38 @@ class Turn:
     # Computed after synthesis
     audio_duration_ms: float | None = None
     end_time_ms: float | None = None
+    
+    # Aliases for cleaner API
+    speaker: str = field(default="", repr=False)
+    duration: float | None = field(default=None, repr=False)
+    
+    def __post_init__(self):
+        # Support both speaker and speaker_id
+        if self.speaker and not self.speaker_id:
+            self.speaker_id = self.speaker
+        elif self.speaker_id and not self.speaker:
+            self.speaker = self.speaker_id
+        
+        # Support both duration (seconds) and duration_ms
+        if self.duration is not None and self.duration_ms is None:
+            self.duration_ms = self.duration * 1000
+        elif self.duration_ms is not None and self.duration is None:
+            self.duration = self.duration_ms / 1000
+    
+    @property
+    def start_time(self) -> float | None:
+        """Start time in seconds."""
+        if self.start_time_ms is not None:
+            return self.start_time_ms / 1000
+        return None
+    
+    @start_time.setter
+    def start_time(self, value: float | None):
+        """Set start time in seconds."""
+        if value is not None:
+            self.start_time_ms = value * 1000
+        else:
+            self.start_time_ms = None
     
     @classmethod
     def speech(
@@ -188,6 +220,7 @@ class Timeline:
     
     turns: list[Turn] = field(default_factory=list)
     gap_ms: float = 100  # Default gap between turns
+    _current_time: float = field(default=0.0, repr=False)  # Tracks next start time in seconds
     
     @property
     def total_duration_ms(self) -> float:
@@ -197,7 +230,53 @@ class Timeline:
         last_turn = self.turns[-1]
         if last_turn.end_time_ms is not None:
             return last_turn.end_time_ms
-        return 0
+        # Calculate from durations
+        total = 0.0
+        for turn in self.turns:
+            if turn.duration_ms is not None:
+                total += turn.duration_ms
+        return total
+    
+    @property
+    def total_duration(self) -> float:
+        """Total duration in seconds."""
+        return self.total_duration_ms / 1000
+    
+    def add_turn(self, turn: Turn) -> None:
+        """Add a turn to the timeline with automatic timing.
+        
+        Args:
+            turn: Turn to add.
+        """
+        # Set start time
+        turn.start_time_ms = self._current_time * 1000
+        
+        # Calculate duration from turn's duration field
+        duration_s = turn.duration if turn.duration is not None else 0.0
+        turn.duration_ms = duration_s * 1000
+        turn.end_time_ms = turn.start_time_ms + turn.duration_ms
+        
+        # Advance current time
+        self._current_time += duration_s
+        
+        self.turns.append(turn)
+    
+    def turn_at(self, time_seconds: float) -> Turn | None:
+        """Get the turn at a specific time.
+        
+        Args:
+            time_seconds: Time in seconds.
+        
+        Returns:
+            Turn at that time, or None if no turn.
+        """
+        time_ms = time_seconds * 1000
+        for turn in self.turns:
+            start = turn.start_time_ms or 0
+            end = turn.end_time_ms or (start + (turn.duration_ms or 0))
+            if start <= time_ms < end:
+                return turn
+        return None
     
     def compute_timing(self, durations: list[float]) -> "Timeline":
         """Compute timing for all turns given audio durations.

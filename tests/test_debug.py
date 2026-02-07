@@ -28,8 +28,8 @@ def sample_graph():
     """Create a sample graph for testing."""
     return ControlGraph(
         tokens=[
-            TokenEvent(text="Hello", start_ms=0, duration_ms=100),
-            TokenEvent(text="world", start_ms=100, duration_ms=100),
+            TokenEvent(text="Hello"),
+            TokenEvent(text="world"),
         ],
         speaker=SpeakerRef.from_voice("af_bella"),
     )

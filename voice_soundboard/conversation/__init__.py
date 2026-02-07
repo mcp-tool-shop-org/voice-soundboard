@@ -28,7 +28,7 @@ Example:
 """
 
 from voice_soundboard.conversation.speaker import Speaker, SpeakerStyle
-from voice_soundboard.conversation.turn import Turn, TurnType
+from voice_soundboard.conversation.turn import Turn, TurnType, Timeline
 from voice_soundboard.conversation.conversation import Conversation
 from voice_soundboard.conversation.parser import ScriptParser
 
@@ -37,6 +37,7 @@ __all__ = [
     "SpeakerStyle",
     "Turn",
     "TurnType",
+    "Timeline",
     "Conversation",
     "ScriptParser",
 ]

@@ -9,7 +9,7 @@ from enum import Enum
 from typing import Any
 
 
-class SpeakerStyle(Enum):
+class SpeakerStylePreset(Enum):
     """Pre-defined speaking styles."""
     
     NEUTRAL = "neutral"
@@ -22,12 +22,32 @@ class SpeakerStyle(Enum):
 
 
 @dataclass
+class SpeakerStyle:
+    """Detailed style configuration for a speaker.
+    
+    Attributes:
+        pitch: Pitch adjustment (1.0 = normal)
+        speed: Speech speed multiplier (1.0 = normal)
+        emotion: Emotion/style string (e.g., "excited", "calm")
+        energy: Energy level (1.0 = normal)
+        preset: Optional preset style
+    """
+    pitch: float = 1.0
+    speed: float = 1.0
+    emotion: str = "neutral"
+    energy: float = 1.0
+    preset: SpeakerStylePreset | None = None
+
+
+@dataclass
 class Speaker:
     """Configuration for a conversation speaker.
     
     Attributes:
+        name: Display name for the speaker.
         voice: Voice identifier for TTS.
-        style: Speaking style/emotion.
+        style: Speaking style configuration.
+        language: Language code (e.g., "en").
         speed: Speech speed multiplier.
         pitch: Pitch adjustment.
         volume: Volume level (0-1).
@@ -35,15 +55,16 @@ class Speaker:
     
     Example:
         speaker = Speaker(
+            name="Alice",
             voice="af_bella",
-            style=SpeakerStyle.FRIENDLY,
-            speed=1.1,
+            style=SpeakerStyle(pitch=1.1, emotion="friendly"),
         )
     """
     
-    voice: str
     name: str = ""
-    style: SpeakerStyle | str = SpeakerStyle.NEUTRAL
+    voice: str | None = None
+    style: SpeakerStyle | SpeakerStylePreset | str | None = None
+    language: str = "en"
     speed: float = 1.0
     pitch: float = 1.0
     volume: float = 1.0
@@ -56,7 +77,7 @@ class Speaker:
     def __post_init__(self):
         if isinstance(self.style, str):
             try:
-                self.style = SpeakerStyle(self.style)
+                self.style = SpeakerStylePreset(self.style)
             except ValueError:
                 # Keep as string for custom styles
                 pass
@@ -64,8 +85,12 @@ class Speaker:
     @property
     def emotion(self) -> str:
         """Get emotion string from style."""
-        if isinstance(self.style, SpeakerStyle):
+        if isinstance(self.style, SpeakerStylePreset):
             return self.style.value
+        elif isinstance(self.style, SpeakerStyle):
+            return self.style.emotion
+        elif self.style is None:
+            return "neutral"
         return str(self.style)
     
     def with_style(self, style: SpeakerStyle | str) -> "Speaker":

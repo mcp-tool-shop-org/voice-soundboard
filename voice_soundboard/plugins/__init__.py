@@ -38,6 +38,7 @@ from voice_soundboard.plugins.registry import (
 from voice_soundboard.plugins.hooks import (
     Hook,
     HookManager,
+    HookType,
     on_graph,
     on_audio,
     on_error,
@@ -59,6 +60,7 @@ __all__ = [
     # Hooks
     "Hook",
     "HookManager",
+    "HookType",
     "on_graph",
     "on_audio",
     "on_error",

@@ -5,13 +5,39 @@ Hook system for plugin event handling.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Callable, Any, TypeVar, ParamSpec
+from typing import Callable, Any, TypeVar, ParamSpec, Union
 from functools import wraps
+from enum import Enum, auto
 import threading
 
 import numpy as np
 
 from voice_soundboard.graph import ControlGraph
+
+
+class HookType(Enum):
+    """Types of hooks in the plugin system."""
+    
+    PRE_SYNTHESIS = auto()
+    """Called before synthesis starts."""
+    
+    POST_SYNTHESIS = auto()
+    """Called after synthesis completes."""
+    
+    ON_GRAPH = auto()
+    """Called when a graph is produced."""
+    
+    ON_AUDIO = auto()
+    """Called when audio is produced."""
+    
+    ON_ERROR = auto()
+    """Called when an error occurs."""
+    
+    ON_STREAM_CHUNK = auto()
+    """Called for each streaming chunk."""
+    
+    ON_INTERRUPT = auto()
+    """Called when synthesis is interrupted."""
 
 
 P = ParamSpec("P")
@@ -83,11 +109,13 @@ class HookManager:
     
     def __init__(self):
         self._hooks: dict[str, list[Hook]] = {event: [] for event in self.EVENTS}
+        # Also support HookType enum
+        self._typed_hooks: dict[HookType, list[Callable]] = {ht: [] for ht in HookType}
         self._lock = threading.Lock()
     
     def register(
         self,
-        event: str,
+        event: Union[str, HookType],
         callback: Callable[..., Any],
         priority: int = 100,
         plugin_name: str = "",
@@ -95,7 +123,7 @@ class HookManager:
         """Register a hook callback.
         
         Args:
-            event: Event name.
+            event: Event name (string) or HookType enum.
             callback: Function to call.
             priority: Execution priority.
             plugin_name: Plugin that owns this hook.
@@ -106,6 +134,17 @@ class HookManager:
         Raises:
             ValueError: If event is unknown.
         """
+        # Handle HookType enum
+        if isinstance(event, HookType):
+            with self._lock:
+                self._typed_hooks[event].append(callback)
+            return Hook(
+                event=event.name,
+                callback=callback,
+                priority=priority,
+                plugin_name=plugin_name,
+            )
+        
         if event not in self._hooks:
             raise ValueError(f"Unknown event: {event}")
         
@@ -122,8 +161,70 @@ class HookManager:
         
         return hook
     
-    def unregister(self, hook: Hook) -> bool:
+    def unregister(
+        self,
+        event_or_hook: Union[str, HookType, Hook],
+        callback: Callable[..., Any] | None = None,
+    ) -> bool:
         """Unregister a hook.
+        
+        Args:
+            event_or_hook: Hook to unregister, or HookType/event name with callback.
+            callback: Callback to unregister (if event_or_hook is HookType or str).
+        
+        Returns:
+            True if hook was found and removed.
+        """
+        # Handle HookType enum with callback
+        if isinstance(event_or_hook, HookType):
+            with self._lock:
+                if callback in self._typed_hooks.get(event_or_hook, []):
+                    self._typed_hooks[event_or_hook].remove(callback)
+                    return True
+            return False
+        
+        # Handle Hook object
+        if isinstance(event_or_hook, Hook):
+            with self._lock:
+                if event_or_hook in self._hooks.get(event_or_hook.event, []):
+                    self._hooks[event_or_hook.event].remove(event_or_hook)
+                    return True
+            return False
+        
+        # Handle string event with callback
+        if callback is not None:
+            with self._lock:
+                for hook in self._hooks.get(event_or_hook, []):
+                    if hook.callback == callback:
+                        self._hooks[event_or_hook].remove(hook)
+                        return True
+        return False
+    
+    def trigger(self, event: HookType, data: Any = None) -> list[Any]:
+        """Trigger a hook type with data.
+        
+        Args:
+            event: HookType to trigger.
+            data: Data to pass to callbacks.
+        
+        Returns:
+            List of return values from callbacks.
+        """
+        results = []
+        with self._lock:
+            callbacks = list(self._typed_hooks.get(event, []))
+        
+        for callback in callbacks:
+            try:
+                result = callback(data)
+                results.append(result)
+            except Exception:
+                pass  # Ignore errors in hooks
+        
+        return results
+    
+    def _unregister_hook_object(self, hook: Hook) -> bool:
+        """Internal: Unregister a Hook object.
         
         Args:
             hook: Hook to unregister.

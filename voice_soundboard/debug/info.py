@@ -27,6 +27,33 @@ from contextlib import contextmanager
 
 
 @dataclass
+class TimingInfo:
+    """Timing information for a phase of synthesis.
+    
+    Attributes:
+        name: Phase name (e.g., "compile", "synthesize")
+        start_time: Start timestamp
+        end_time: End timestamp
+        duration_ms: Duration in milliseconds
+    """
+    name: str
+    start_time: float = 0.0
+    end_time: float = 0.0
+    duration_ms: float = 0.0
+    
+    @classmethod
+    def start(cls, name: str) -> "TimingInfo":
+        """Start timing a phase."""
+        return cls(name=name, start_time=time.perf_counter())
+    
+    def stop(self) -> "TimingInfo":
+        """Stop timing and calculate duration."""
+        self.end_time = time.perf_counter()
+        self.duration_ms = (self.end_time - self.start_time) * 1000
+        return self
+
+
+@dataclass
 class DebugInfo:
     """Debug information from a synthesis operation.
     
@@ -37,6 +64,9 @@ class DebugInfo:
     synth_time_ms: float = 0.0
     total_time_ms: float = 0.0
     io_time_ms: float = 0.0
+    
+    # Timing dictionary for flexible timing tracking
+    timing: dict[str, float] = field(default_factory=dict)
     
     # Graph statistics
     graph_tokens: int = 0
@@ -60,9 +90,30 @@ class DebugInfo:
     # Memory (if available)
     peak_memory_mb: float = 0.0
     
+    def add_timing(self, name: str, duration_ms: float) -> None:
+        """Add timing for a named phase.
+        
+        Args:
+            name: Phase name (e.g., "compile", "synthesize")
+            duration_ms: Duration in milliseconds
+        """
+        self.timing[name] = duration_ms
+        
+        # Also update specific fields if applicable
+        if name == "compile":
+            self.compile_time_ms = duration_ms
+        elif name == "synth" or name == "synthesize":
+            self.synth_time_ms = duration_ms
+        elif name == "io":
+            self.io_time_ms = duration_ms
+    
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
-        return asdict(self)
+        result = asdict(self)
+        # Ensure timing is included
+        if "timing" not in result:
+            result["timing"] = self.timing
+        return result
     
     def summary(self) -> str:
         """Human-readable summary."""
@@ -106,6 +157,8 @@ class DebugContext:
     _phase_starts: dict[str, float] = field(default_factory=dict)
     _metadata: dict[str, Any] = field(default_factory=dict)
     _start_time: float = field(default_factory=time.perf_counter)
+    _records: list[str] = field(default_factory=list)
+    _record_times: dict[str, float] = field(default_factory=dict)
     
     def start_phase(self, name: str):
         """Start timing a phase."""
@@ -118,6 +171,27 @@ class DebugContext:
             self._phases[name] = elapsed * 1000  # Convert to ms
             del self._phase_starts[name]
     
+    def record(self, name: str):
+        """Record a timing checkpoint.
+        
+        Call this to mark a point in time. The time between
+        consecutive records is captured in the timing dict.
+        
+        Args:
+            name: Name of the checkpoint/phase.
+        """
+        now = time.perf_counter()
+        
+        if self._records:
+            # Calculate time since last record
+            prev_name = self._records[-1]
+            if prev_name in self._record_times:
+                elapsed = (now - self._record_times[prev_name]) * 1000
+                self._phases[prev_name] = elapsed
+        
+        self._records.append(name)
+        self._record_times[name] = now
+    
     def set(self, key: str, value: Any):
         """Set a metadata value."""
         self._metadata[key] = value
@@ -126,15 +200,26 @@ class DebugContext:
         """Get a metadata value."""
         return self._metadata.get(key, default)
     
+    def get_info(self) -> DebugInfo:
+        """Get the debug info built from recorded data.
+        
+        Alias for build() that can be called during or after the context.
+        
+        Returns:
+            DebugInfo with timing and metadata.
+        """
+        return self.build()
+    
     def build(self) -> DebugInfo:
         """Build the final DebugInfo object."""
         total_time = (time.perf_counter() - self._start_time) * 1000
         
-        return DebugInfo(
+        info = DebugInfo(
             compile_time_ms=self._phases.get("compile", 0.0),
             synth_time_ms=self._phases.get("synth", 0.0),
             io_time_ms=self._phases.get("io", 0.0),
             total_time_ms=total_time,
+            timing=dict(self._phases),
             graph_tokens=self._metadata.get("graph_tokens", 0),
             graph_events=self._metadata.get("graph_events", 0),
             graph_source_chars=self._metadata.get("graph_source_chars", 0),
@@ -148,6 +233,7 @@ class DebugContext:
             realtime_factor=self._metadata.get("realtime_factor", 0.0),
             peak_memory_mb=self._metadata.get("peak_memory_mb", 0.0),
         )
+        return info
     
     def __enter__(self) -> "DebugContext":
         self._start_time = time.perf_counter()
