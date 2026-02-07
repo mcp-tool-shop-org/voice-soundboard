@@ -16,14 +16,16 @@ def load_backend(
     backend: str = "auto",
     model_dir: Path | str | None = None,
     device: str = "auto",
+    **kwargs,
 ) -> TTSBackend:
     """Load a TTS backend.
     
     Args:
         backend: Backend name or "auto" to auto-detect.
-                 Options: "kokoro", "piper", "mock", "auto"
+                 Options: "kokoro", "piper", "openai", "coqui", "mock", "auto"
         model_dir: Directory containing model files
         device: "cuda", "cpu", or "auto"
+        **kwargs: Additional backend-specific options
     
     Returns:
         Initialized TTSBackend
@@ -42,6 +44,17 @@ def load_backend(
         from voice_soundboard.engine.backends.piper import PiperBackend
         use_cuda = device == "cuda"
         return PiperBackend(model_dir=model_dir, use_cuda=use_cuda)
+    
+    # v2.1: OpenAI backend
+    if backend == "openai":
+        from voice_soundboard.engine.backends.openai import OpenAITTSBackend
+        return OpenAITTSBackend(**kwargs)
+    
+    # v2.1: Coqui backend
+    if backend == "coqui":
+        from voice_soundboard.engine.backends.coqui import CoquiTTSBackend
+        gpu = device == "cuda"
+        return CoquiTTSBackend(gpu=gpu, **kwargs)
     
     if backend == "mock":
         from voice_soundboard.engine.backends.mock import MockBackend

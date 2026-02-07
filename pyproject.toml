@@ -1,6 +1,6 @@
 [project]
 name = "voice-soundboard"
-version = "2.0.0"
+version = "2.1.0"
 description = "Text-to-speech for AI agents and developers. Compiler → Graph → Engine architecture."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -37,6 +37,17 @@ mcp = [
 websocket = [
     "websockets>=12.0",
 ]
+# v2.1: New backend dependencies
+openai = [
+    "openai>=1.0.0",
+]
+coqui = [
+    "TTS>=0.21.0",
+]
+# v2.1: Voice cloning dependencies
+cloning = [
+    "resemblyzer>=0.1.1",
+]
 dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
@@ -48,6 +59,9 @@ all = [
     "piper-tts>=1.2.0",
     "mcp>=1.0.0",
     "websockets>=12.0",
+    "openai>=1.0.0",
+    "TTS>=0.21.0",
+    "resemblyzer>=0.1.1",
 ]
 
 [project.scripts]
