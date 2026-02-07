@@ -121,7 +121,7 @@
 ### ❌ BLOCKER: No MCP Integration Tests
 
 ```
-Searched: voice-soundboard-v2/tests/**
+Searched: voice-soundboard/tests/**
 Pattern: MCP|mcp|MCPServer|MCPMock
 Result: No matches found
 ```
@@ -166,7 +166,7 @@ Result: No matches found
 ### ❌ BLOCKER: No Security Tests
 
 ```
-Searched: voice-soundboard-v2/tests/**
+Searched: voice-soundboard/tests/**
 Pattern: security|sandbox|injection|PluginSandbox
 Result: No matches found
 ```
