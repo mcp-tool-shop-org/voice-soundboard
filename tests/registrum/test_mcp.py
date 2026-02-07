@@ -40,6 +40,7 @@ class TestMCPRegistrarIntegration:
     ):
         """MCP tool call that starts audio must route via registrar"""
         # MCP layer calls runtime to play audio
+        # create_stream already uses START via registrar, putting stream in COMPILING
         stream_id = harness.create_stream(agent_id=agent)
         
         # Mock MCP tool call
@@ -49,20 +50,14 @@ class TestMCPRegistrarIntegration:
             "actor": agent,
         }
         
-        # Runtime enforces registrar usage
+        # Runtime enforces registrar usage - direct calls must fail
         with pytest.raises(RegistrarRequiredError):
             runtime.play_audio_direct(stream_id)
         
-        # MCP must go through registrar
-        result = registrar.request(
-            action=TransitionAction.START,
-            actor=agent,
-            target=stream_id,
-        )
-        assert result.allowed is True
-    
-    # =========================================================================
-    # Test 2: MCP respects ownership rules
+        # Verify the stream was created through registrar (already in COMPILING state)
+        state = registrar.get_state(stream_id)
+        assert state is not None
+        assert state.state == StreamState.COMPILING
     # =========================================================================
     
     def test_mcp_respects_ownership_rules(
@@ -138,8 +133,10 @@ class TestMCPToolRouting:
         agent: str,
     ):
         """Synthesize tool call routes through registrar"""
+        # create_stream starts in COMPILING state
         stream_id = harness.create_stream(agent_id=agent)
-        harness.advance_stream(stream_id, StreamState.COMPILING)
+        # Advance through SYNTHESIZING first (COMPILING -> SYNTHESIZING requires COMPILE)
+        harness.advance_stream(stream_id, StreamState.SYNTHESIZING)
         
         # MCP synthesize request
         result = registrar.request(
@@ -225,7 +222,7 @@ class TestMCPOwnershipEnforcement:
             action=TransitionAction.TRANSFER,
             actor=agent_b,
             target=stream_id,
-            parameters={"new_owner": agent_b},
+            metadata={"new_owner": agent_b},
         )
         
         assert result.allowed is False

@@ -115,9 +115,14 @@ class BaseInvariant(ABC):
     ) -> list[InvariantViolation]:
         ...
     
-    def _violation(self, message: str) -> InvariantViolation:
+    def _violation(
+        self,
+        message: str,
+        classification: Literal["REJECT", "HALT"] | None = None,
+    ) -> InvariantViolation:
         """Helper to create a violation for this invariant."""
-        classification: Literal["REJECT", "HALT"] = "HALT" if self.failure_mode == "halt" else "REJECT"
+        if classification is None:
+            classification = "HALT" if self.failure_mode == "halt" else "REJECT"
         return InvariantViolation(
             invariant_id=self.id,
             classification=classification,
@@ -175,26 +180,35 @@ class SingleOwnerInvariant(BaseInvariant):
 @dataclass  
 class OwnershipRequiredInvariant(BaseInvariant):
     """
-    Ownership is required to interrupt a stream.
+    Ownership is required to control a stream (interrupt or stop).
     
-    Only the owner (or accessibility override) can interrupt a stream.
+    Only the owner (or an accessibility override owner) can interrupt or stop a stream.
+    Non-owners are always denied, regardless of 'interruptible' flag.
+    The 'interruptible' flag controls higher-priority agent interruption, 
+    but that's handled separately.
     """
+    
+    # Actions that require ownership
+    OWNERSHIP_REQUIRED_ACTIONS = {
+        TransitionAction.INTERRUPT,
+        TransitionAction.STOP,
+    }
     
     @property
     def id(self) -> str:
-        return "audio.ownership.required_for_interrupt"
+        return "audio.ownership.required_for_control"
     
     @property
     def description(self) -> str:
-        return "Ownership required for interrupt (unless accessibility override)"
+        return "Ownership required to control stream (unless accessibility override)"
     
     def check(
         self,
         transition: AudioTransition,
         current_states: dict[str, AudioState],
     ) -> list[InvariantViolation]:
-        # Only applies to interrupt actions
-        if transition.request.action != TransitionAction.INTERRUPT:
+        # Only applies to ownership-controlled actions
+        if transition.request.action not in self.OWNERSHIP_REQUIRED_ACTIONS:
             return []
         
         target_id = transition.request.target
@@ -203,24 +217,24 @@ class OwnershipRequiredInvariant(BaseInvariant):
         
         current = current_states[target_id]
         requesting_agent = transition.request.actor
+        action_name = transition.request.action.value
         
         # Check accessibility override (takes precedence)
+        # User-initiated accessibility override can control stream
         if current.accessibility.override_active:
-            # Accessibility override can always interrupt
-            return []
+            if requesting_agent.startswith("user_"):
+                return []  # User can control with accessibility override
         
-        # Check ownership
+        # Check ownership - non-owner is ALWAYS denied
         if current.ownership is None:
             return [self._violation(
-                f"Stream {target_id} has no owner, cannot be interrupted"
+                f"Stream {target_id} has no owner, cannot be {action_name}ed"
             )]
         
         if current.ownership.agent_id != requesting_agent:
-            if not current.ownership.interruptible:
-                return [self._violation(
-                    f"Stream {target_id} is not interruptible and not owned by {requesting_agent}"
-                )]
-            # Could add priority check here for interruptible streams
+            return [self._violation(
+                f"Only owner ({current.ownership.agent_id}) can {action_name} stream {target_id}, not {requesting_agent}"
+            )]
         
         return []
 
@@ -234,8 +248,15 @@ class AccessibilitySupremacyInvariant(BaseInvariant):
     """
     INV-4: Accessibility overrides always win over agent intent.
     
-    This is a HALT-level invariant. If accessibility is bypassed,
-    the system must stop — this is a safety violation.
+    This invariant has both REJECT and HALT-level behaviors:
+    - Agent interrupts when override active: REJECT (normal blocking)
+    - Silent override disable: HALT (critical safety violation)
+    - Silent override modification: REJECT (normal blocking)
+    
+    When an accessibility override is active:
+    1. The override cannot be silently disabled
+    2. Override values cannot be silently modified
+    3. Agent interrupts are blocked (only override owner can interrupt)
     """
     
     @property
@@ -248,7 +269,7 @@ class AccessibilitySupremacyInvariant(BaseInvariant):
     
     @property
     def failure_mode(self) -> Literal["reject", "halt"]:
-        return "halt"  # Critical safety invariant
+        return "halt"  # Default is HALT for most violations
     
     def check(
         self,
@@ -261,19 +282,49 @@ class AccessibilitySupremacyInvariant(BaseInvariant):
         
         current = current_states[target_id]
         proposed = transition.to_state
+        actor = transition.request.actor
+        metadata = transition.request.metadata
         
-        # If accessibility override is active, check it's preserved
+        # Non-users (plugins/agents) cannot disable accessibility overrides
+        # This protects against plugins circumventing accessibility controls
+        if transition.request.action == TransitionAction.DISABLE_OVERRIDE:
+            if not actor.startswith("user_"):
+                return [self._violation(
+                    f"Agent/plugin {actor} cannot disable accessibility override on stream {target_id}. "
+                    "Only users can disable accessibility overrides.",
+                    classification="REJECT",
+                )]
+        
+        # If accessibility override is active, enforce supremacy
         if current.accessibility.override_active:
+            # Block agent interrupts when accessibility override is active
+            # This is a REJECT (normal blocking), not a HALT (safety violation)
+            if transition.request.action == TransitionAction.INTERRUPT:
+                # Check if this is an accessibility-driven interrupt (from override owner)
+                # Non-user actors (agents) are blocked
+                
+                # Allow if the actor is the user who owns the override
+                # Otherwise, block the interrupt
+                if not actor.startswith("user_") and not metadata.get("override_owner"):
+                    return [self._violation(
+                        f"Agent {actor} cannot interrupt stream {target_id} while accessibility "
+                        "override is active. Only the override owner can interrupt.",
+                        classification="REJECT",  # Normal rejection, not a safety halt
+                    )]
+            
             # Check that proposed state doesn't silently disable override
+            # This is a HALT-level violation (safety critical)
             if not proposed.accessibility.override_active:
                 # Override was disabled — is this an explicit action?
                 if transition.request.action != TransitionAction.DISABLE_OVERRIDE:
                     return [self._violation(
                         f"Accessibility override silently disabled on stream {target_id}. "
-                        "Must use explicit DISABLE_OVERRIDE action."
+                        "Must use explicit DISABLE_OVERRIDE action.",
+                        classification="HALT",  # Critical safety violation
                     )]
             
             # Check that override values aren't silently modified
+            # This is a REJECT (could be accidental), not HALT
             if transition.request.action not in {
                 TransitionAction.UPDATE_OVERRIDE,
                 TransitionAction.DISABLE_OVERRIDE,
@@ -283,7 +334,8 @@ class AccessibilitySupremacyInvariant(BaseInvariant):
                 if current_rate != proposed_rate:
                     return [self._violation(
                         f"Speech rate override silently changed from {current_rate} to {proposed_rate}. "
-                        "Must use explicit UPDATE_OVERRIDE action."
+                        "Must use explicit UPDATE_OVERRIDE action.",
+                        classification="REJECT",
                     )]
         
         return []
@@ -440,7 +492,18 @@ class ValidTransitionInvariant(BaseInvariant):
     
     Not all state transitions are allowed. For example,
     IDLE cannot directly transition to PLAYING (must compile first).
+    
+    Accessibility actions (ENABLE_OVERRIDE, DISABLE_OVERRIDE, UPDATE_OVERRIDE)
+    are exempt from state transition validation since they only modify
+    accessibility state, not stream lifecycle state.
     """
+    
+    # Accessibility actions that don't change stream state
+    ACCESSIBILITY_ACTIONS = {
+        TransitionAction.ENABLE_OVERRIDE,
+        TransitionAction.DISABLE_OVERRIDE,
+        TransitionAction.UPDATE_OVERRIDE,
+    }
     
     @property
     def id(self) -> str:
@@ -457,8 +520,18 @@ class ValidTransitionInvariant(BaseInvariant):
     ) -> list[InvariantViolation]:
         target_id = transition.request.target
         
-        # New streams start from IDLE (valid by definition)
+        # Accessibility actions don't change stream state, so skip validation
+        if transition.request.action in self.ACCESSIBILITY_ACTIONS:
+            return []
+        
+        # New streams: START action is allowed (IDLE -> COMPILING is valid)
         if not target_id or target_id not in current_states:
+            # For new streams, check if the initial transition is valid
+            # START from implicit IDLE to COMPILING is the canonical path
+            if transition.request.action == TransitionAction.START:
+                if transition.to_state.state == StreamState.COMPILING:
+                    return []  # Valid start
+            # Any other action on new stream should start from IDLE
             if transition.to_state.state != StreamState.IDLE:
                 return [self._violation(
                     f"New stream must start in IDLE state, not {transition.to_state.state.value}"

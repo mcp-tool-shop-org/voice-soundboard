@@ -338,8 +338,8 @@ class TestInvariantLocking:
         
         acc_inv = getattr(invariants, "AccessibilitySupremacyInvariant", None)
         if acc_inv:
-            # Check for CRITICAL or HALT-level marker
-            assert hasattr(acc_inv, "level") or hasattr(acc_inv, "priority"), \
+            # Check for CRITICAL or HALT-level marker via failure_mode property
+            assert hasattr(acc_inv, "failure_mode") or hasattr(acc_inv, "level") or hasattr(acc_inv, "priority"), \
                 "Accessibility invariant should have severity level"
 
 

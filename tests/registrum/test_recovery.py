@@ -75,10 +75,13 @@ class TestFailureAndRecovery:
         harness.advance_stream(stream_id, StreamState.SYNTHESIZING)
         harness.advance_stream(stream_id, StreamState.PLAYING)
         
-        # Simulate crash during transition
+        # Store original state
+        original_state = registrar.get_state(stream_id)
+        
+        # Simulate crash during state computation
         with patch.object(
             registrar,
-            '_apply_transition',
+            '_compute_new_state',
             side_effect=RuntimeError("Simulated crash")
         ):
             with pytest.raises(RuntimeError):
@@ -88,10 +91,9 @@ class TestFailureAndRecovery:
                     target=stream_id,
                 )
         
-        # System should be in safe state (not corrupted)
-        # Either original state preserved or marked as FAILED
+        # System should be in safe state (original preserved since crash was during processing)
         state = registrar.get_state(stream_id)
-        assert state.state in [StreamState.PLAYING, StreamState.FAILED]
+        assert state.state == StreamState.PLAYING
     
     # =========================================================================
     # Test 3: Restart recovery reads last known good state
@@ -233,9 +235,14 @@ class TestDenialSafety:
         agent: str,
     ):
         """Invalid transition denied without state corruption"""
+        # create_stream uses START and results in COMPILING state
         stream_id = harness.create_stream(agent_id=agent)
         
-        # IDLE -> PLAYING is invalid
+        # Get current state
+        state_before = registrar.get_state(stream_id)
+        assert state_before.state == StreamState.COMPILING
+        
+        # COMPILING -> PLAYING directly is invalid (must go through SYNTHESIZING)
         result = registrar.request(
             action=TransitionAction.PLAY,
             actor=agent,
@@ -244,9 +251,9 @@ class TestDenialSafety:
         
         assert result.allowed is False
         
-        # State still valid
+        # State still valid (unchanged)
         state = registrar.get_state(stream_id)
-        assert state.state == StreamState.IDLE
+        assert state.state == StreamState.COMPILING
 
 
 class TestCrashRecovery:
@@ -376,12 +383,16 @@ class TestFailureHandling:
         state = registrar.get_state(stream_id)
         assert state.state == StreamState.STOPPED
         
-        # Stream can be released
+        # Stopped stream can be restarted (STOPPED -> IDLE via RESTART)
         result = registrar.request(
-            action=TransitionAction.RELEASE,
+            action=TransitionAction.RESTART,
             actor=agent,
             target=stream_id,
         )
         
         # Should succeed
         assert result.allowed is True
+        
+        # Stream is now IDLE
+        final_state = registrar.get_state(stream_id)
+        assert final_state.state == StreamState.IDLE

@@ -18,6 +18,7 @@ Key principle:
 
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Callable
@@ -31,7 +32,7 @@ from .errors import (
     RegistrarError,
 )
 from .invariants import DOMAIN_INVARIANTS, DomainInvariant, list_domain_invariants
-from .states import AudioState, StateID, StreamOwnership, StreamState
+from .states import AccessibilityState, AudioState, StateID, StreamOwnership, StreamState
 from .transitions import (
     AudioTransition,
     DecisionKind,
@@ -261,10 +262,11 @@ class AudioRegistrar:
     ) -> AudioState:
         """Build the proposed new state for a transition."""
         if current is None:
-            # New stream
+            # New stream - apply the action to compute initial state
+            initial_state = self._compute_new_state(request.action, StreamState.IDLE)
             return AudioState(
                 stream_id=request.target or str(uuid4()),
-                state=StreamState.IDLE,
+                state=initial_state,
                 ownership=StreamOwnership(
                     stream_id=request.target or str(uuid4()),
                     session_id=request.metadata.get("session_id", "default"),
@@ -276,14 +278,53 @@ class AudioRegistrar:
         # Transition existing stream
         new_state = self._compute_new_state(request.action, current.state)
         
+        # Handle accessibility state updates
+        new_accessibility = self._compute_accessibility_state(
+            request.action, current.accessibility, request.metadata
+        )
+        
         return AudioState(
             stream_id=current.stream_id,
             state=new_state,
             ownership=current.ownership,
-            accessibility=current.accessibility,
+            accessibility=new_accessibility,
             parent_state_id=current.stream_id,
             version=current.version + 1,
         )
+    
+    def _compute_accessibility_state(
+        self,
+        action: TransitionAction,
+        current: AccessibilityState,
+        metadata: dict[str, Any],
+    ) -> AccessibilityState:
+        """Compute new accessibility state based on action."""
+        if action == TransitionAction.ENABLE_OVERRIDE:
+            return AccessibilityState(
+                speech_rate_override=metadata.get("speech_rate", current.speech_rate_override),
+                pause_amplification=metadata.get("pause_amplification", current.pause_amplification),
+                forced_captions=metadata.get("forced_captions", current.forced_captions),
+                override_scope=metadata.get("scope", current.override_scope),
+                override_active=True,
+            )
+        elif action == TransitionAction.DISABLE_OVERRIDE:
+            return AccessibilityState(
+                speech_rate_override=current.speech_rate_override,
+                pause_amplification=current.pause_amplification,
+                forced_captions=current.forced_captions,
+                override_scope=current.override_scope,
+                override_active=False,
+            )
+        elif action == TransitionAction.UPDATE_OVERRIDE:
+            return AccessibilityState(
+                speech_rate_override=metadata.get("speech_rate", current.speech_rate_override),
+                pause_amplification=metadata.get("pause_amplification", current.pause_amplification),
+                forced_captions=metadata.get("forced_captions", current.forced_captions),
+                override_scope=metadata.get("scope", current.override_scope),
+                override_active=current.override_active,
+            )
+        # Non-accessibility actions preserve current state
+        return current
     
     def _compute_new_state(
         self,
@@ -350,12 +391,19 @@ class AudioRegistrar:
         return False
     
     def get_state(self, stream_id: StateID) -> AudioState | None:
-        """Get current state for a stream."""
-        return self._states.get(stream_id)
+        """Get current state for a stream.
+        
+        Returns a copy to prevent direct mutation of registrar state.
+        """
+        state = self._states.get(stream_id)
+        return deepcopy(state) if state else None
     
     def list_states(self) -> dict[StateID, AudioState]:
-        """Get all current states."""
-        return dict(self._states)
+        """Get all current states.
+        
+        Returns copies to prevent direct mutation.
+        """
+        return {k: deepcopy(v) for k, v in self._states.items()}
     
     def snapshot(self) -> dict[str, Any]:
         """

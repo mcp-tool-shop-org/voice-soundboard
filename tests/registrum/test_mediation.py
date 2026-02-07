@@ -94,15 +94,28 @@ class TestRegistrarMediation:
         state = registrar.get_state(stream_id)
         assert state is not None
         
-        # Attempting to directly modify accessibility state should fail
-        # The state objects are designed to be immutable/controlled
         original_override = state.accessibility.override_active
+        assert original_override is False  # Default is False
         
-        # Any attempt to silently change accessibility state without
-        # going through registrar should be detected
-        with pytest.raises((AttributeError, TypeError, AccessibilityBypassError)):
-            # Attempting direct mutation on frozen/protected object
-            state.accessibility.override_active = True
+        # Direct mutation on local object doesn't affect registrar's state
+        # The registrar maintains its own copy
+        state.accessibility.override_active = True
+        
+        # Verify the registrar's state is unchanged (isolated copy)
+        registrar_state = registrar.get_state(stream_id)
+        assert registrar_state.accessibility.override_active == original_override
+        
+        # Proper accessibility changes require explicit action through registrar
+        result = registrar.request(
+            action=TransitionAction.ENABLE_OVERRIDE,
+            actor=agent,
+            target=stream_id,
+        )
+        assert result.allowed is True
+        
+        # NOW the registrar's state is changed
+        updated_state = registrar.get_state(stream_id)
+        assert updated_state.accessibility.override_active is True
     
     # =========================================================================
     # Test 4: Plugin attempting mutation without registrar → fails
@@ -121,10 +134,27 @@ class TestRegistrarMediation:
         state = registrar.get_state(stream_id)
         assert state is not None
         
-        # Plugins cannot directly mutate lifecycle state
-        with pytest.raises((AttributeError, TypeError)):
-            # AudioState should be immutable or have protected fields
-            state.state = StreamState.STOPPED
+        original_state = state.state
+        
+        # Direct mutation on local object doesn't affect registrar
+        state.state = StreamState.STOPPED
+        
+        # Verify registrar's state is unchanged (isolated copy)
+        registrar_state = registrar.get_state(stream_id)
+        assert registrar_state.state == original_state
+        
+        # Only proper transitions through registrar actually change state
+        harness.advance_stream(stream_id, StreamState.PLAYING)
+        result = registrar.request(
+            action=TransitionAction.STOP,
+            actor=agent,
+            target=stream_id,
+        )
+        assert result.allowed is True
+        
+        # NOW the state is actually STOPPED
+        final_state = registrar.get_state(stream_id)
+        assert final_state.state == StreamState.STOPPED
     
     # =========================================================================
     # Additional: Verify bypass detection works

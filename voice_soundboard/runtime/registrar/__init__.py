@@ -50,8 +50,31 @@ Integration Architecture:
     └─────────────────────────────────────────────────────┘
 """
 
-# Defer imports until submodules are created
-# This prevents import errors during scaffolding
+from .bridge import RegistrumBridge, RegistrumConfig
+from .registrar import AudioRegistrar, Attestation, AttestationStore
+from .states import StreamState, StreamOwnership, AccessibilityState, AudioState
+from .transitions import (
+    AudioTransition,
+    TransitionAction,
+    TransitionRequest,
+    TransitionResult,
+)
+from .invariants import (
+    DomainInvariant,
+    SingleOwnerInvariant,
+    AccessibilitySupremacyInvariant,
+    NoDeadInterruptInvariant,
+    PluginImmutabilityInvariant,
+    CommitBoundaryInvariant,
+)
+from .errors import (
+    RegistrarError,
+    InvariantViolationError,
+    OwnershipError,
+    AccessibilityBypassError,
+    RegistrumConnectionError,
+)
+
 __all__ = [
     # Bridge to Registrum
     "RegistrumBridge",
@@ -65,6 +88,7 @@ __all__ = [
     "AudioState",
     # Transitions (mapped to Registrum Transition model)
     "AudioTransition",
+    "TransitionAction",
     "TransitionRequest",
     "TransitionResult",
     # Domain Invariants (layered on Registrum's 11)

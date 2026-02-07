@@ -32,6 +32,7 @@ from voice_soundboard.runtime.registrar import (
     TransitionRequest,
     TransitionResult,
 )
+from voice_soundboard.runtime.registrar.transitions import DecisionKind
 from voice_soundboard.runtime.registrar.bridge import RegistrumBridge, RegistrumConfig
 from voice_soundboard.runtime.registrar.errors import (
     AccessibilityBypassError,
@@ -136,7 +137,15 @@ class RegistrumTestHarness:
         
         agent_id = current.ownership.agent_id if current.ownership else "test_agent"
         
-        # Map target state to required actions
+        # Define the valid state progression path
+        state_order = [
+            StreamState.IDLE,
+            StreamState.COMPILING,
+            StreamState.SYNTHESIZING,
+            StreamState.PLAYING,
+        ]
+        
+        # Map each state to the action needed to reach it
         state_actions = {
             StreamState.COMPILING: TransitionAction.START,
             StreamState.SYNTHESIZING: TransitionAction.COMPILE,
@@ -147,6 +156,40 @@ class RegistrumTestHarness:
             StreamState.IDLE: TransitionAction.RESTART,
         }
         
+        # Special case: restarting from STOPPED or FAILED to IDLE
+        if to_state == StreamState.IDLE and current.state in {StreamState.STOPPED, StreamState.FAILED}:
+            return self.registrar.request(
+                action=TransitionAction.RESTART,
+                actor=agent_id,
+                target=stream_id,
+            )
+        
+        # For main path states, advance through intermediate states
+        if to_state in state_order and current.state in state_order:
+            current_idx = state_order.index(current.state)
+            target_idx = state_order.index(to_state)
+            
+            # Walk through intermediate states
+            result = None
+            for idx in range(current_idx + 1, target_idx + 1):
+                next_state = state_order[idx]
+                action = state_actions.get(next_state)
+                if not action:
+                    raise ValueError(f"Cannot transition to {next_state}")
+                
+                result = self.registrar.request(
+                    action=action,
+                    actor=agent_id,
+                    target=stream_id,
+                )
+                if not result.allowed:
+                    return result  # Stop on failure
+            
+            if result is None:
+                raise ValueError(f"Already at state {to_state}")
+            return result
+        
+        # For non-path states (interrupt, stop, fail), use direct action
         action = state_actions.get(to_state)
         if not action:
             raise ValueError(f"Cannot transition to {to_state}")
@@ -205,9 +248,12 @@ class MockRuntime:
             # Direct mutation (WRONG - should be caught by tests)
             self._streams[stream_id] = {"state": StreamState.COMPILING}
             return TransitionResult(
-                kind="accepted",
-                allowed=True,
-                reason="bypassed",
+                kind=DecisionKind.ACCEPTED,
+                request=TransitionRequest(
+                    action=TransitionAction.START,
+                    actor=agent_id,
+                    target=stream_id,
+                ),
             )
         
         return self._registrar.request(
@@ -222,7 +268,14 @@ class MockRuntime:
             # Direct mutation (WRONG)
             if stream_id in self._streams:
                 self._streams[stream_id]["state"] = StreamState.INTERRUPTING
-            return TransitionResult(kind="accepted", allowed=True, reason="bypassed")
+            return TransitionResult(
+                kind=DecisionKind.ACCEPTED,
+                request=TransitionRequest(
+                    action=TransitionAction.INTERRUPT,
+                    actor=agent_id or "bypass",
+                    target=stream_id,
+                ),
+            )
         
         # Must have agent_id to request through registrar
         if agent_id is None:
@@ -239,7 +292,14 @@ class MockRuntime:
         if self._bypass_enabled:
             if stream_id in self._streams:
                 self._streams[stream_id]["state"] = StreamState.STOPPED
-            return TransitionResult(kind="accepted", allowed=True, reason="bypassed")
+            return TransitionResult(
+                kind=DecisionKind.ACCEPTED,
+                request=TransitionRequest(
+                    action=TransitionAction.STOP,
+                    actor=agent_id or "bypass",
+                    target=stream_id,
+                ),
+            )
         
         if agent_id is None:
             raise RegistrarRequiredError("stop", stream_id)
@@ -249,6 +309,23 @@ class MockRuntime:
             actor=agent_id,
             target=stream_id,
         )
+    
+    # These _direct methods simulate bypassing the registrar, which should fail
+    def stop_audio_direct(self, stream_id: str, requester: str | None = None) -> None:
+        """Direct stop (WRONG - must go through registrar)."""
+        raise RegistrarRequiredError("stop_audio_direct", stream_id)
+    
+    def interrupt_audio_direct(self, stream_id: str, requester: str | None = None) -> None:
+        """Direct interrupt (WRONG - must go through registrar)."""
+        raise RegistrarRequiredError("interrupt_audio_direct", stream_id)
+    
+    def play_audio_direct(self, stream_id: str, requester: str | None = None) -> None:
+        """Direct play (WRONG - must go through registrar)."""
+        raise RegistrarRequiredError("play_audio_direct", stream_id)
+    
+    def set_stream_state(self, stream_id: str, state: StreamState, requester: str | None = None) -> None:
+        """Direct state mutation (WRONG - must go through registrar)."""
+        raise RegistrarRequiredError("set_stream_state", stream_id)
 
 
 # =============================================================================
