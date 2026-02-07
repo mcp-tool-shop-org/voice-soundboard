@@ -21,7 +21,7 @@ def load_backend(
     
     Args:
         backend: Backend name or "auto" to auto-detect.
-                 Options: "kokoro", "mock", "auto"
+                 Options: "kokoro", "piper", "mock", "auto"
         model_dir: Directory containing model files
         device: "cuda", "cpu", or "auto"
     
@@ -37,6 +37,11 @@ def load_backend(
     if backend == "kokoro":
         from voice_soundboard.engine.backends.kokoro import KokoroBackend
         return KokoroBackend(model_dir=model_dir, device=device)
+    
+    if backend == "piper":
+        from voice_soundboard.engine.backends.piper import PiperBackend
+        use_cuda = device == "cuda"
+        return PiperBackend(model_dir=model_dir, use_cuda=use_cuda)
     
     if backend == "mock":
         from voice_soundboard.engine.backends.mock import MockBackend
@@ -57,6 +62,16 @@ def _auto_load(model_dir: Path | str | None, device: str) -> TTSBackend:
     except ImportError:
         pass
     
+    # Try Piper second (fast, lightweight)
+    try:
+        from voice_soundboard.engine.backends.piper import PiperBackend, is_available as piper_available
+        if piper_available():
+            logger.info("Auto-detected Piper backend")
+            use_cuda = device == "cuda"
+            return PiperBackend(model_dir=model_dir, use_cuda=use_cuda)
+    except ImportError:
+        pass
+    
     # Fall back to mock
     logger.warning("No TTS backend available, using mock")
     from voice_soundboard.engine.backends.mock import MockBackend
@@ -71,6 +86,13 @@ def list_backends() -> list[str]:
         from voice_soundboard.engine.backends.kokoro import is_available
         if is_available():
             available.append("kokoro")
+    except ImportError:
+        pass
+    
+    try:
+        from voice_soundboard.engine.backends.piper import is_available as piper_available
+        if piper_available():
+            available.append("piper")
     except ImportError:
         pass
     

@@ -114,3 +114,102 @@ class TestBackendProtocol:
         assert hasattr(backend, "name")
         assert hasattr(backend, "sample_rate")
         assert hasattr(backend, "synthesize")
+
+
+class TestPiperBackend:
+    """Tests for PiperBackend (without requiring piper-tts installed)."""
+    
+    def test_piper_available_flag(self):
+        """Test PIPER_AVAILABLE is exposed."""
+        from voice_soundboard.engine import PIPER_AVAILABLE
+        assert isinstance(PIPER_AVAILABLE, bool)
+    
+    def test_piper_in_list_backends_when_available(self):
+        """Piper should appear in list_backends if available."""
+        backends = list_backends()
+        # May or may not be available depending on installation
+        assert isinstance(backends, list)
+    
+    def test_piper_voice_mappings(self):
+        """Test Piper voice mappings are defined."""
+        from voice_soundboard.engine.backends.piper import PIPER_VOICES, KOKORO_TO_PIPER
+        
+        # Should have English voices at minimum
+        assert any("en_US" in v for v in PIPER_VOICES)
+        assert any("en_GB" in v for v in PIPER_VOICES)
+        
+        # Should have Kokoro compat mapping
+        assert "af_bella" in KOKORO_TO_PIPER
+        assert "am_michael" in KOKORO_TO_PIPER
+    
+    def test_piper_speed_to_length_scale(self):
+        """Test speed → length_scale conversion (inverse relationship)."""
+        from voice_soundboard.engine.backends.piper import PiperBackend
+        
+        # Create backend (won't load models)
+        backend = PiperBackend.__new__(PiperBackend)
+        backend._default_voice = "en_US_lessac_medium"
+        
+        # Test conversion logic directly
+        # speed=2.0 → length_scale=0.5 (faster)
+        graph_fast = ControlGraph(
+            tokens=[TokenEvent(text="test")],
+            speaker=SpeakerRef.from_voice("test"),
+            global_speed=2.0,
+        )
+        length_scale = backend._lower_speed(graph_fast)
+        assert length_scale == pytest.approx(0.5, rel=0.01)
+        
+        # speed=0.5 → length_scale=2.0 (slower)
+        graph_slow = ControlGraph(
+            tokens=[TokenEvent(text="test")],
+            speaker=SpeakerRef.from_voice("test"),
+            global_speed=0.5,
+        )
+        length_scale = backend._lower_speed(graph_slow)
+        assert length_scale == pytest.approx(2.0, rel=0.01)
+    
+    def test_piper_voice_resolution(self):
+        """Test voice ID resolution logic."""
+        from voice_soundboard.engine.backends.piper import PiperBackend
+        
+        backend = PiperBackend.__new__(PiperBackend)
+        backend._default_voice = "en_US_lessac_medium"
+        
+        # Direct Piper voice
+        graph = ControlGraph(
+            tokens=[TokenEvent(text="test")],
+            speaker=SpeakerRef.from_voice("en_US_ryan_medium"),
+        )
+        assert backend._lower_voice(graph) == "en_US_ryan_medium"
+        
+        # Kokoro voice → Piper mapping
+        graph = ControlGraph(
+            tokens=[TokenEvent(text="test")],
+            speaker=SpeakerRef.from_voice("af_bella"),
+        )
+        assert backend._lower_voice(graph) == "en_US_lessac_medium"
+        
+        # Unknown voice → default
+        graph = ControlGraph(
+            tokens=[TokenEvent(text="test")],
+            speaker=SpeakerRef.from_voice("unknown_voice"),
+        )
+        assert backend._lower_voice(graph) == "en_US_lessac_medium"
+    
+    def test_piper_text_lowering(self):
+        """Test token text concatenation."""
+        from voice_soundboard.engine.backends.piper import PiperBackend
+        
+        backend = PiperBackend.__new__(PiperBackend)
+        
+        graph = ControlGraph(
+            tokens=[
+                TokenEvent(text="Hello"),
+                TokenEvent(text="world"),
+                TokenEvent(text="!"),
+            ],
+            speaker=SpeakerRef.from_voice("test"),
+        )
+        text = backend._lower_text(graph)
+        assert text == "Hello world !"
