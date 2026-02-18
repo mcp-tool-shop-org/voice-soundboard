@@ -1,9 +1,20 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mcp-tool-shop-org/voice-soundboard/main/logo.png" alt="MCP Tool Shop" width="200" />
+</p>
+
 # Voice Soundboard v2
 
+[![PyPI version](https://img.shields.io/pypi/v/voice-soundboard.svg)](https://pypi.org/project/voice-soundboard/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Text-to-speech for AI agents and developers.** Compiler → Graph → Engine architecture.
+**Text-to-speech for AI agents and developers.** Compiler -> Graph -> Engine architecture.
+
+Part of [MCP Tool Shop](https://mcp-tool-shop.github.io/) -- practical developer tools that stay out of your way.
+
+## Why Voice Soundboard?
+
+Existing TTS libraries make you choose: easy API or real control. Voice Soundboard gives you both. A single `engine.speak()` call handles the common case, while the Compiler/Graph/Engine split lets you pre-compile speech intents, swap backends at runtime, and stream audio sentence-by-sentence -- all without changing your top-level code.
 
 ## What's New in v2
 
@@ -32,11 +43,11 @@ print(result.audio_path)  # output/af_bella_<hash>.wav
 
 ```
 compile_request("text", emotion="happy")
-        ↓
+        |
     ControlGraph (pure data)
-        ↓
+        |
     engine.synthesize(graph)
-        ↓
+        |
     PCM audio (numpy array)
 ```
 
@@ -142,8 +153,8 @@ voice-soundboard emotions
 
 | Backend | Quality | Speed | Sample Rate | Install |
 |---------|---------|-------|-------------|---------|
-| Kokoro | ⭐⭐⭐⭐⭐ | Fast (GPU) | 24000 Hz | `pip install voice-soundboard[kokoro]` |
-| Piper | ⭐⭐⭐⭐ | Fast (CPU) | 22050 Hz | `pip install voice-soundboard[piper]` |
+| Kokoro | Excellent | Fast (GPU) | 24000 Hz | `pip install voice-soundboard[kokoro]` |
+| Piper | Great | Fast (CPU) | 22050 Hz | `pip install voice-soundboard[piper]` |
 | Mock | N/A | Instant | 24000 Hz | (built-in, for testing) |
 
 ### Kokoro Setup
@@ -184,12 +195,12 @@ result = engine.speak("Hello!", voice="af_bella")  # Uses en_US_lessac_medium
 ```
 voice_soundboard/
 ├── graph/          # ControlGraph, TokenEvent, SpeakerRef
-├── compiler/       # Text → Graph (all features live here)
+├── compiler/       # Text -> Graph (all features live here)
 │   ├── text.py     # Tokenization, normalization
-│   ├── emotion.py  # Emotion → prosody
+│   ├── emotion.py  # Emotion -> prosody
 │   ├── style.py    # Natural language style
 │   └── compile.py  # Main entry point
-├── engine/         # Graph → PCM (no features, just synthesis)
+├── engine/         # Graph -> PCM (no features, just synthesis)
 │   └── backends/   # Kokoro, Piper, Mock
 ├── runtime/        # Streaming, scheduling
 └── adapters/       # CLI, API, MCP (thin wrappers)
@@ -201,7 +212,7 @@ voice_soundboard/
 
 These rules are enforced in tests and must never be violated:
 
-1. **Engine isolation**: `engine/` never imports from `compiler/`. The engine knows nothing about emotions, styles, or presets - only ControlGraphs.
+1. **Engine isolation**: `engine/` never imports from `compiler/`. The engine knows nothing about emotions, styles, or presets -- only ControlGraphs.
 
 2. **Voice cloning boundary**: Raw audio never reaches the engine. The compiler extracts speaker embeddings; the engine receives only embedding vectors via `SpeakerRef`.
 
@@ -234,4 +245,4 @@ If you imported internals, see the migration mapping:
 
 ## License
 
-MIT
+MIT -- see [LICENSE](LICENSE) for details.
