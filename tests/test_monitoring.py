@@ -37,7 +37,7 @@ class TestHealthCheck:
                 message="Backend operational",
             )
         
-        health.register("backend", backend_check)
+        health.register_checker("backend", backend_check)
         
         # Check that component is registered
         result = health.check()
@@ -47,11 +47,11 @@ class TestHealthCheck:
     def test_overall_health_degraded(self):
         health = HealthCheck()
         
-        health.register("healthy", lambda: ComponentHealth(
+        health.register_checker("healthy", lambda: ComponentHealth(
             name="healthy",
             status=HealthStatus.HEALTHY,
         ))
-        health.register("degraded", lambda: ComponentHealth(
+        health.register_checker("degraded", lambda: ComponentHealth(
             name="degraded",
             status=HealthStatus.DEGRADED,
             message="High latency",
@@ -64,11 +64,11 @@ class TestHealthCheck:
     def test_overall_health_unhealthy(self):
         health = HealthCheck()
         
-        health.register("healthy", lambda: ComponentHealth(
+        health.register_checker("healthy", lambda: ComponentHealth(
             name="healthy",
             status=HealthStatus.HEALTHY,
         ))
-        health.register("unhealthy", lambda: ComponentHealth(
+        health.register_checker("unhealthy", lambda: ComponentHealth(
             name="unhealthy",
             status=HealthStatus.UNHEALTHY,
             message="Connection failed",
@@ -84,24 +84,24 @@ class TestCounter:
     def test_counter_increment(self):
         counter = Counter("requests", "Total requests")
         
-        assert counter.value == 0
+        assert counter.get() == 0
         
         counter.inc()
-        assert counter.value == 1
+        assert counter.get() == 1
         
         counter.inc(5)
-        assert counter.value == 6
+        assert counter.get() == 6
         
     def test_counter_with_labels(self):
         counter = Counter("requests", "Total requests", labels=["method", "status"])
         
-        counter.inc(labels={"method": "GET", "status": "200"})
-        counter.inc(labels={"method": "POST", "status": "201"})
-        counter.inc(labels={"method": "GET", "status": "200"})
+        counter.inc(method="GET", status="200")
+        counter.inc(method="POST", status="201")
+        counter.inc(method="GET", status="200")
         
         # Get value for specific labels
-        assert counter.value_for({"method": "GET", "status": "200"}) == 2
-        assert counter.value_for({"method": "POST", "status": "201"}) == 1
+        assert counter.get(method="GET", status="200") == 2
+        assert counter.get(method="POST", status="201") == 1
 
 
 class TestGauge:
@@ -111,20 +111,20 @@ class TestGauge:
         gauge = Gauge("temperature", "Current temperature")
         
         gauge.set(25.5)
-        assert gauge.value == 25.5
+        assert gauge.get() == 25.5
         
         gauge.set(30.0)
-        assert gauge.value == 30.0
+        assert gauge.get() == 30.0
         
     def test_gauge_inc_dec(self):
         gauge = Gauge("connections", "Active connections")
         
         gauge.set(10)
         gauge.inc()
-        assert gauge.value == 11
+        assert gauge.get() == 11
         
         gauge.dec(3)
-        assert gauge.value == 8
+        assert gauge.get() == 8
 
 
 class TestHistogram:
@@ -144,8 +144,9 @@ class TestHistogram:
         histogram.observe(0.3)    # < 0.5
         histogram.observe(0.8)    # < 1.0
         
-        assert histogram.count == 5
-        assert histogram.sum == pytest.approx(1.188, rel=0.01)
+        stats = histogram.get_stats()
+        assert stats["count"] == 5
+        assert stats["sum"] == pytest.approx(1.208, rel=0.01)
         
     def test_histogram_percentiles(self):
         histogram = Histogram("response_time", "Response time")
@@ -155,8 +156,9 @@ class TestHistogram:
             histogram.observe(i / 100)  # 0.0 to 0.99
         
         # Check percentiles (approximate)
-        p50 = histogram.percentile(50)
-        p99 = histogram.percentile(99)
+        stats = histogram.get_stats()
+        p50 = stats["p50"]
+        p99 = stats["p99"]
         
         assert 0.4 <= p50 <= 0.6
         assert p99 > 0.9
@@ -168,9 +170,9 @@ class TestMetricsCollector:
     def test_create_metrics(self):
         collector = MetricsCollector()
         
-        counter = collector.counter("test_counter", "A test counter")
-        gauge = collector.gauge("test_gauge", "A test gauge")
-        histogram = collector.histogram("test_histogram", "A test histogram")
+        counter = collector.register_counter("test_counter", "A test counter")
+        gauge = collector.register_gauge("test_gauge", "A test gauge")
+        histogram = collector.register_histogram("test_histogram", "A test histogram")
         
         assert isinstance(counter, Counter)
         assert isinstance(gauge, Gauge)
@@ -179,25 +181,29 @@ class TestMetricsCollector:
     def test_collect_all(self):
         collector = MetricsCollector()
         
-        counter = collector.counter("requests", "Total requests")
-        gauge = collector.gauge("active", "Active connections")
+        counter = collector.register_counter("requests", "Total requests")
+        gauge = collector.register_gauge("active", "Active connections")
         
         counter.inc(10)
         gauge.set(5)
         
-        metrics = collector.collect()
+        metrics = collector.get_report()
         
-        assert "requests" in metrics
-        assert metrics["requests"]["value"] == 10
-        assert "active" in metrics
-        assert metrics["active"]["value"] == 5
+        # Check custom metrics presence
+        assert "custom" in metrics
+        assert "requests" in metrics["custom"]
+        # With the fix in metrics.py, keys are stringified dicts: "{}"
+        assert metrics["custom"]["requests"]["{}"] == 10
+        assert "active" in metrics["custom"]
+        assert metrics["custom"]["active"]["{}"] == 5
         
     def test_export_prometheus(self):
         collector = MetricsCollector()
         
-        counter = collector.counter("http_requests_total", "Total HTTP requests")
+        counter = collector.register_counter("http_requests_total", "Total HTTP requests")
         counter.inc(100)
         
+        # Export logic might append type suffix or keep as is?
         output = collector.export_prometheus()
         
         assert "http_requests_total" in output

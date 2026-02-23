@@ -417,7 +417,8 @@ class MetricsCollector:
         """Get value from a metric."""
         if isinstance(metric, Histogram):
             return metric.get_stats()
-        return dict(metric.values())
+        # Convert dict keys to string representation for JSON compatibility
+        return {str(k): v for k, v in metric.values()}
     
     def export_prometheus(self) -> str:
         """Export metrics in Prometheus text format.
@@ -471,6 +472,24 @@ class MetricsCollector:
                 lines.append(f'{name}_bucket{{{label_str},{le_label}}} {count}')
             else:
                 lines.append(f'{name}_bucket{{{le_label}}} {count}')
+        
+        # Export custom metrics
+        for metric in self._custom_metrics.values():
+            if isinstance(metric, (Counter, Gauge)):
+                metric_type = "counter" if isinstance(metric, Counter) else "gauge"
+                format_metric(metric.name, metric.description, metric_type, metric.values())
+            elif isinstance(metric, Histogram):
+                name = metric.name
+                lines.append(f"# HELP {name} {metric.description}")
+                lines.append(f"# TYPE {name} histogram")
+                
+                for labels, bucket, count in self._iter_histogram_buckets(metric):
+                    label_str = ",".join(f'{k}="{v}"' for k, v in labels.items())
+                    le_label = f'le="{bucket}"'
+                    if label_str:
+                        lines.append(f'{name}_bucket{{{label_str},{le_label}}} {count}')
+                    else:
+                        lines.append(f'{name}_bucket{{{le_label}}} {count}')
         
         return "\n".join(lines)
     

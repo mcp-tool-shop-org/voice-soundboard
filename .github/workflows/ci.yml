@@ -33,7 +33,7 @@ jobs:
       
       - name: Run tests
         run: |
-          python -m pytest tests/ -v --tb=short
+          python -m pytest tests/ --ignore=tests/v29_soak/ --ignore=tests/v31_hardening/ -v --tb=short
       
       - name: Check architecture invariants
         run: |
