@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Soundboard - TTS for AI Agents</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        },
+                        dark: {
+                            bg: '#0f172a',
+                            surface: '#1e293b',
+                            border: '#334155'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['"Fira Code"', 'monospace'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        pre, code { font-family: 'Fira Code', monospace; }
+        .gradient-text {
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-dark-bg text-gray-300 min-h-screen antialiased selection:bg-brand-500/30">
+
+    <!-- Navbar -->
+    <nav class="border-b border-dark-border/50 sticky top-0 bg-dark-bg/80 backdrop-blur-md z-50">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="logo.png" alt="Voice Soundboard" class="w-8 h-8">
+                <span class="font-bold text-lg text-white">Voice Soundboard</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <a href="https://github.com/mcp-tool-shop-org/voice-soundboard" class="hover:text-white transition-colors">GitHub</a>
+                <a href="https://pypi.org/project/voice-soundboard/" class="hover:text-white transition-colors">PyPI</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <main class="max-w-6xl mx-auto px-6 pt-20 pb-24">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            
+            <!-- Left: Content -->
+            <div class="space-y-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-900/30 border border-brand-500/20 text-brand-400 text-sm font-medium">
+                    <span class="w-2 h-2 rounded-full bg-brand-400 animate-pulse"></span>
+                    v2.5.2 Released
+                </div>
+                
+                <h1 class="text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight">
+                    Give your AI agents <br>
+                    <span class="gradient-text">a voice that feels real</span>.
+                </h1>
+                
+                <p class="text-xl text-gray-400 leading-relaxed max-w-lg">
+                    Production-grade text-to-speech engine for Python. 
+                    Zero-cost abstractions, compiled control graphs, and swappable backends.
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                    <div class="relative group">
+                        <div class="absolute -inset-0.5 bg-gradient-to-r from-brand-400 to-indigo-500 rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000"></div>
+                        <div class="relative flex items-center bg-dark-surface border border-dark-border rounded-lg px-4 py-3 font-mono text-gray-200">
+                            <span class="text-brand-400 mr-2">$</span>
+                            pip install voice-soundboard
+                            <button onclick="navigator.clipboard.writeText('pip install voice-soundboard')" class="ml-4 text-gray-500 hover:text-white transition-colors" title="Copy">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Code -->
+            <div class="relative">
+                <div class="absolute -inset-1 bg-gradient-to-tr from-brand-500/20 to-purple-500/20 rounded-xl blur-xl"></div>
+                <div class="relative bg-dark-bg border border-dark-border rounded-xl shadow-2xl overflow-hidden">
+                    <div class="flex items-center gap-2 px-4 py-3 border-b border-dark-border bg-dark-surface/50">
+                        <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+                        <span class="ml-2 text-xs text-gray-500 font-mono">quickstart.py</span>
+                    </div>
+                    <div class="p-6 overflow-x-auto text-sm font-mono leading-relaxed">
+<span class="text-purple-400">from</span> voice_soundboard <span class="text-purple-400">import</span> VoiceEngine
+
+<span class="text-gray-500"># Start the engine</span>
+engine = VoiceEngine()
+
+<span class="text-gray-500"># Say something naturally</span>
+result = engine.<span class="text-blue-400">speak</span>(
+    <span class="text-green-400">"Hello world! This is my AI voice."</span>,
+    emotion=<span class="text-green-400">"excited"</span>
+)
+
+<span class="text-yellow-400">print</span>(f<span class="text-green-400">"Audio saved to: {result.audio_path}"</span>)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Features -->
+    <section class="bg-dark-surface/30 border-y border-dark-border/50 py-24">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="p-6 rounded-2xl bg-dark-surface border border-dark-border hover:border-brand-500/50 transition duration-300">
+                    <div class="w-12 h-12 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Zero-Cost Abstractions</h3>
+                    <p class="text-sm text-gray-400">Emotions, styles, and SSML compile into a control graph before runtime. The engine stays fast and unaware of high-level concepts.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="p-6 rounded-2xl bg-dark-surface border border-dark-border hover:border-brand-500/50 transition duration-300">
+                    <div class="w-12 h-12 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Swappable Backends</h3>
+                    <p class="text-sm text-gray-400">Switch between Kokoro (GPU optimized), Piper (CPU fast), or your own custom TTS engine without changing application code.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="p-6 rounded-2xl bg-dark-surface border border-dark-border hover:border-brand-500/50 transition duration-300">
+                    <div class="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center text-green-400 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Streaming Ready</h3>
+                    <p class="text-sm text-gray-400">Built for real-time applications. Stream audio sentence-by-sentence with sentence boundary awareness.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-border py-12 text-center text-sm text-gray-500">
+        <p class="mb-4">Part of <a href="https://mcp-tool-shop.github.io/" class="text-brand-400 hover:text-brand-300">MCP Tool Shop</a></p>
+        <p>&copy; 2026 Voice Soundboard Contributors. MIT License.</p>
+    </footer>
+
+</body>
+</html>
