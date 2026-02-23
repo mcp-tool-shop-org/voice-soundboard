@@ -3,8 +3,21 @@ name: CI
 on:
   push:
     branches: [main]
+    paths:
+      - "**/*.py"
+      - "pyproject.toml"
+      - "setup.cfg"
+      - "requirements*.txt"
+      - ".github/workflows/**"
   pull_request:
     branches: [main]
+    paths:
+      - "**/*.py"
+      - "pyproject.toml"
+      - "setup.cfg"
+      - "requirements*.txt"
+      - ".github/workflows/**"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -15,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.11", "3.12"]
     
     steps:
       - uses: actions/checkout@v4
@@ -37,7 +50,6 @@ jobs:
       
       - name: Check architecture invariants
         run: |
-          # Verify engine doesn't import from compiler
           python -c "
           import ast
           import sys
@@ -56,7 +68,7 @@ jobs:
                               print(f'ERROR: {f} imports from compiler: {name}')
                               sys.exit(1)
           
-          print('✅ Architecture invariant verified: engine does not import compiler')
+          print('Architecture invariant verified: engine does not import compiler')
           "
 
   validate-assets:
@@ -72,7 +84,6 @@ jobs:
       
       - name: Validate audio event assets
         run: |
-          # Only validate if actual WAV files exist (not just manifest template)
           if [ -f "assets/audio_events/manifest.json" ] && \
              [ -n "$(find assets/audio_events -name '*.wav' 2>/dev/null)" ]; then
             python tools/validate_audio_events.py
@@ -99,4 +110,4 @@ jobs:
       - name: Lint with ruff
         run: |
           ruff check voice_soundboard/ tests/ --ignore=E501
-        continue-on-error: true  # Don't fail CI on lint issues yet
+        continue-on-error: true

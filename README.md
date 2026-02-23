@@ -10,6 +10,9 @@
     <a href="https://pypi.org/project/voice-soundboard/">
         <img src="https://img.shields.io/pypi/v/voice-soundboard.svg" alt="PyPI version">
     </a>
+    <a href="https://github.com/mcp-tool-shop-org/voice-soundboard/actions/workflows/ci.yml">
+        <img src="https://github.com/mcp-tool-shop-org/voice-soundboard/actions/workflows/ci.yml/badge.svg" alt="CI">
+    </a>
     <a href="https://www.python.org/downloads/">
         <img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python 3.10+">
     </a>
