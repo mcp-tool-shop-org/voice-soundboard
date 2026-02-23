@@ -312,17 +312,25 @@ class GraphVisualizer:
         speaker_val = graph.speaker.value if isinstance(graph.speaker.value, str) else "custom embedding"
         source = getattr(graph, 'source_text', '') or "[no source text]"
         
-        return HTML_TEMPLATE.format(
-            tokens_html="\n".join(tokens_html),
-            token_count=len(graph.tokens),
-            event_count=len(events),
-            speaker=html.escape(str(speaker_val)),
-            speed=graph.global_speed,
-            pitch=graph.global_pitch,
-            sample_rate=graph.sample_rate or "auto",
-            source_text=html.escape(source),
-            graph_json=json.dumps(graph_data, indent=2),
-        )
+        # Format HTML using manual replacement to avoid CSS brace conflicts
+        # (HTML_TEMPLATE contains unescaped CSS braces which break .format())
+        template = HTML_TEMPLATE
+        replacements = {
+            "{tokens_html}": "\n".join(tokens_html),
+            "{token_count}": str(len(graph.tokens)),
+            "{event_count}": str(len(events)),
+            "{speaker}": html.escape(str(speaker_val)),
+            "{speed}": str(graph.global_speed),
+            "{pitch}": str(graph.global_pitch),
+            "{sample_rate}": str(graph.sample_rate or "auto"),
+            "{source_text}": html.escape(source),
+            "{graph_json}": json.dumps(graph_data, indent=2),
+        }
+        
+        for key, value in replacements.items():
+            template = template.replace(key, value)
+            
+        return template
 
 
 def visualize_graph(

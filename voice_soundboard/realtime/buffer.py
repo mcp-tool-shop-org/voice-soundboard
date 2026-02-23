@@ -205,22 +205,25 @@ class RealtimeBuffer:
                     audio = audio[:n_samples]
             
             # Write to ring buffer
-            end_pos = (self._write_pos + n_samples) % self._size
-            
-            if end_pos > self._write_pos:
-                # Contiguous write
-                self._buffer[self._write_pos:end_pos] = audio
-            else:
-                # Wrap around
-                first_part = self._size - self._write_pos
-                self._buffer[self._write_pos:] = audio[:first_part]
-                self._buffer[:end_pos] = audio[first_part:]
-            
-            self._write_pos = end_pos
-            self._count += n_samples
-            self._stats.samples_written += n_samples
-            
-            self._write_event.set()
+            if n_samples > 0:
+                end_pos = (self._write_pos + n_samples) % self._size
+                
+                if end_pos > self._write_pos:
+                    # Contiguous write
+                    self._buffer[self._write_pos:end_pos] = audio
+                else:
+                    # Wrap around
+                    first_part = self._size - self._write_pos
+                    if first_part > 0:
+                        self._buffer[self._write_pos:] = audio[:first_part]
+                    if end_pos > 0:
+                        self._buffer[:end_pos] = audio[first_part:]
+                
+                self._write_pos = end_pos
+                self._count += n_samples
+                self._stats.samples_written += n_samples
+                
+                self._write_event.set()
         
         return n_samples
     

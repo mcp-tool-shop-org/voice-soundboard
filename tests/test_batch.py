@@ -172,10 +172,10 @@ class TestConvenienceFunction:
     def test_basic_usage(self):
         """Basic convenience function usage."""
         texts = ["Hello", "World"]
-        backend = MockBackend()
         
         # Should succeed
-        results = batch_synthesize(texts, voice="af_bella", backend=backend)
+        # Use "mock" string, not instance, as batch_synthesize expects backend name
+        results = batch_synthesize(texts, voice="af_bella", backend="mock")
         
         assert isinstance(results, BatchResult)
         assert len(results.items) == 2

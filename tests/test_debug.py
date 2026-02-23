@@ -88,27 +88,23 @@ class TestDebugContext:
 
 class TestGraphVisualizer:
     """Tests for GraphVisualizer."""
-    
+
     def test_visualize_graph_html(self, sample_graph):
         """Generate HTML visualization."""
-        html = visualize_graph(sample_graph, format="html")
-        
-        assert isinstance(html, str)
-        assert "<html>" in html.lower() or "<!doctype" in html.lower() or "svg" in html.lower()
-    
-    def test_visualize_graph_text(self, sample_graph):
-        """Generate text visualization."""
-        text = visualize_graph(sample_graph, format="text")
-        
-        assert isinstance(text, str)
-        assert "Hello" in text or "world" in text
-    
+        # Use open_browser=False to avoid opening browser during test
+        path = visualize_graph(sample_graph, open_browser=False)
+        assert path.exists()
+        assert path.suffix == ".html"
+        content = path.read_text(encoding="utf-8")
+        assert "<html>" in content.lower() or "<!doctype" in content.lower()
+
     def test_visualizer_class(self, sample_graph):
         """Use visualizer class directly."""
         viz = GraphVisualizer()
         
         output = viz.render(sample_graph)
         assert output is not None
+        assert "<html" in output.lower()
 
 
 class TestSynthesisProfiler:
