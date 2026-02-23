@@ -154,7 +154,7 @@ Example:
     print(result.debug_info)
 """
 
-__version__ = "2.5.0-alpha.1"
+__version__ = "2.5.2"
 API_VERSION = 2
 
 # Public API - backwards compatible with v1

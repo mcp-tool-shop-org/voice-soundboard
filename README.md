@@ -1,32 +1,38 @@
 <p align="center">
   <img src="logo.png" alt="Voice Soundboard Logo" width="200" />
 </p>
+
+# Voice Soundboard
+
 <p align="center">
-    <em>Text-to-speech for AI agents and developers.</em>
+    <em>Give your AI agents a voice that feels real.</em>
 </p>
 
-# Voice Soundboard v2
+<p align="center">
+    <a href="https://pypi.org/project/voice-soundboard/">
+        <img src="https://img.shields.io/pypi/v/voice-soundboard.svg" alt="PyPI version">
+    </a>
+    <a href="https://www.python.org/downloads/">
+        <img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python 3.10+">
+    </a>
+    <a href="https://opensource.org/licenses/MIT">
+        <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
+    </a>
+</p>
 
-[![PyPI version](https://img.shields.io/pypi/v/voice-soundboard.svg)](https://pypi.org/project/voice-soundboard/)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  Part of <a href="https://mcp-tool-shop.github.io/">MCP Tool Shop</a> — practical developer tools that stay out of your way.
+</p>
 
-**Text-to-speech for AI agents and developers.** Compiler -> Graph -> Engine architecture.
+---
 
-Part of [MCP Tool Shop](https://mcp-tool-shop.github.io/) -- practical developer tools that stay out of your way.
+**Voice Soundboard** is a text-to-speech engine built for developers who need more than just a `.mp3` file.
 
-## Why Voice Soundboard?
+Most TTS libraries force a choice: easy APIs that hide everything, or complex lower-level tools that require audio engineering knowledge. Voice Soundboard gives you the best of both worlds.
 
-Existing TTS libraries make you choose: easy API or real control. Voice Soundboard gives you both. A single `engine.speak()` call handles the common case, while the Compiler/Graph/Engine split lets you pre-compile speech intents, swap backends at runtime, and stream audio sentence-by-sentence -- all without changing your top-level code.
-
-## What's New in v2
-
-v2 is a complete architectural rewrite with the same public API:
-
-- **Compiler/Engine separation**: Features compile to a `ControlGraph`, engine just synthesizes
-- **Zero runtime feature cost**: Emotion, style, SSML are compile-time transforms
-- **Swappable backends**: Kokoro, Piper, or bring your own
-- **Same API**: `VoiceEngine.speak()` works exactly like v1
+*   **Simple High-Level API**: Just call `engine.speak("Hello")` and get audio.
+*   **Powerful Internals**: Under the hood, we use a Compiler/Graph/Engine architecture that separates *what* is said (intent, emotion) from *how* it's rendered (backend, audio format).
+*   **Zero-Cost Abstractions**: Emotions, styles, and SSML are compiled into a control graph, so the runtime engine stays fast and lightweight.
 
 ## Quick Start
 
@@ -37,9 +43,10 @@ pip install voice-soundboard
 ```python
 from voice_soundboard import VoiceEngine
 
+# Easy text-to-speech
 engine = VoiceEngine()
-result = engine.speak("Hello world!")
-print(result.audio_path)  # output/af_bella_<hash>.wav
+result = engine.speak("Hello world! This is my AI voice.")
+print(f"Saved to: {result.audio_path}")
 ```
 
 ## Architecture
