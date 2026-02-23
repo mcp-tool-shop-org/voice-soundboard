@@ -2,8 +2,6 @@
   <img src="logo.png" alt="Voice Soundboard Logo" width="200" />
 </p>
 
-# Voice Soundboard
-
 <p align="center">
     <em>Give your AI agents a voice that feels real.</em>
 </p>
