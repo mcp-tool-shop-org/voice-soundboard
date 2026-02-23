@@ -290,7 +290,7 @@ class TestSceneMultiSpeakerReadiness:
                 action=TransitionAction.START,
                 actor=agent,
             )
-            stream_id = start.effects[0].new_state.stream_id if start.effects else str(uuid4())
+            stream_id = start.state_id if start.allowed else str(uuid4())
             stream_ids.append(stream_id)
             
             # Advance to PLAYING
@@ -366,8 +366,8 @@ class TestRegistrarMultiTrackSupport:
                 metadata={"track": track},
             )
             assert result.allowed
-            if result.effects:
-                stream_ids.append(result.effects[0].new_state.stream_id)
+            if result.state_id:
+                stream_ids.append(result.state_id)
         
         # All tracks should be manageable
         assert len(stream_ids) == len(tracks)
@@ -405,25 +405,19 @@ class TestRegistrarMultiTrackSupport:
         agent = "lifecycle_agent"
         
         # Create two tracks
-        track1 = registrar.request(
+        res1 = registrar.request(
             action=TransitionAction.START,
             actor=agent,
             metadata={"track": "dialogue"},
-        ).effects[0].new_state.stream_id if registrar.request(
-            action=TransitionAction.START,
-            actor=agent,
-            metadata={"track": "dialogue"},
-        ).effects else str(uuid4())
+        )
+        track1 = res1.state_id if res1.allowed else str(uuid4())
         
-        track2 = registrar.request(
+        res2 = registrar.request(
             action=TransitionAction.START,
             actor=agent,
             metadata={"track": "music"},
-        ).effects[0].new_state.stream_id if registrar.request(
-            action=TransitionAction.START,
-            actor=agent,
-            metadata={"track": "music"},
-        ).effects else str(uuid4())
+        )
+        track2 = res2.state_id if res2.allowed else str(uuid4())
         
         # Advance track1 only
         registrar.request(action=TransitionAction.COMPILE, actor=agent, target=track1)
@@ -501,8 +495,8 @@ class TestNoSingleVoiceAssumption:
         assert result.allowed
         
         # One owner for the stream, regardless of voice count
-        if result.effects:
-            state = result.effects[0].new_state
+        if result.allowed:
+            state = registrar.get_state(result.state_id)
             assert state.ownership.agent_id == agent
 
 
