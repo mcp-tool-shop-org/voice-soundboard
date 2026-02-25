@@ -66,3 +66,5 @@ output/
 models/
 *.wav
 *.mp3
+site/.astro/
+node_modules/

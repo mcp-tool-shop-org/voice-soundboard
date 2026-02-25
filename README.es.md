@@ -34,15 +34,15 @@
 
 ---
 
-**Voice Soundboard** is a text-to-speech engine built for developers who need more than just a `.mp3` file.
+**Voice Soundboard** es un motor de texto a voz diseñado para desarrolladores que necesitan algo más que un simple archivo `.mp3`.
 
-Most TTS libraries force a choice: easy APIs that hide everything, or complex lower-level tools that require audio engineering knowledge. Voice Soundboard gives you the best of both worlds.
+La mayoría de las bibliotecas de TTS ofrecen una elección: APIs sencillas que ocultan todo, o herramientas de bajo nivel y complejas que requieren conocimientos de ingeniería de audio. Voice Soundboard le ofrece lo mejor de ambos mundos.
 
-*   **Simple High-Level API**: Just call `engine.speak("Hello")` and get audio.
-*   **Powerful Internals**: Under the hood, we use a Compiler/Graph/Engine architecture that separates *what* is said (intent, emotion) from *how* it's rendered (backend, audio format).
-*   **Zero-Cost Abstractions**: Emotions, styles, and SSML are compiled into a control graph, so the runtime engine stays fast and lightweight.
+*   **API de alto nivel sencilla**: Simplemente llame a `engine.speak("Hola")` y obtenga el audio.
+*   **Internos potentes**: En el núcleo, utilizamos una arquitectura de compilador/grafo/motor que separa *lo que* se dice (intención, emoción) de *cómo* se reproduce (backend, formato de audio).
+*   **Abstracciones de costo cero**: Las emociones, los estilos y el SSML se compilan en un grafo de control, por lo que el motor de ejecución permanece rápido y ligero.
 
-## Quick Start
+## Inicio rápido
 
 ```bash
 pip install voice-soundboard
@@ -57,7 +57,7 @@ result = engine.speak("Hello world! This is my AI voice.")
 print(f"Saved to: {result.audio_path}")
 ```
 
-## Architecture
+## Arquitectura
 
 ```
 compile_request("text", emotion="happy")
@@ -69,18 +69,18 @@ compile_request("text", emotion="happy")
     PCM audio (numpy array)
 ```
 
-**The compiler** transforms intent (text + emotion + style) into a `ControlGraph`.
+**El compilador** transforma la intención (texto + emoción + estilo) en un `ControlGraph`.
 
-**The engine** transforms the graph into audio. It knows nothing about emotions or styles.
+**El motor** transforma el grafo en audio. No sabe nada sobre emociones ni estilos.
 
-This separation means:
-- Features are "free" at runtime (already baked into the graph)
-- Engine is tiny, fast, testable
-- Backends are swappable without touching feature logic
+Esta separación significa:
+- Las funciones son "gratuitas" en tiempo de ejecución (ya están integradas en el grafo).
+- El motor es pequeño, rápido y fácil de probar.
+- Los backends se pueden cambiar sin modificar la lógica de las funciones.
 
-## Usage
+## Uso
 
-### Basic
+### Básico
 
 ```python
 from voice_soundboard import VoiceEngine
@@ -103,7 +103,7 @@ result = engine.speak("I'm so happy!", emotion="excited")
 result = engine.speak("Good morning!", style="warmly and cheerfully")
 ```
 
-### Advanced: Direct Graph Manipulation
+### Avanzado: Manipulación directa del grafo
 
 ```python
 from voice_soundboard.compiler import compile_request
@@ -121,14 +121,14 @@ backend = load_backend("kokoro")
 audio = backend.synthesize(graph)
 ```
 
-### Streaming
+### Transmisión
 
-Streaming operates at two levels:
+La transmisión opera en dos niveles:
 
-1. **Graph streaming**: `compile_stream()` yields ControlGraphs as sentence boundaries are detected
-2. **Audio streaming**: `StreamingSynthesizer` chunks audio for real-time playback
+1. **Transmisión de grafos**: `compile_stream()` genera grafos de control a medida que se detectan los límites de las oraciones.
+2. **Transmisión de audio**: `StreamingSynthesizer` divide el audio para la reproducción en tiempo real.
 
-**Note**: This is sentence-level streaming, not word-by-word incremental synthesis. The compiler waits for sentence boundaries before yielding graphs. True incremental synthesis (speculative execution with rollback) is architecturally supported but not yet implemented.
+**Nota**: Esto es una transmisión a nivel de oración, no una síntesis incremental palabra por palabra. El compilador espera los límites de las oraciones antes de generar los grafos. La síntesis incremental verdadera (ejecución especulativa con retroceso) está soportada arquitectónicamente, pero aún no está implementada.
 
 ```python
 from voice_soundboard.compiler import compile_stream
@@ -148,7 +148,7 @@ for graph in compile_stream(text_chunks()):
         play(audio_chunk)
 ```
 
-## CLI
+## CLI (Interfaz de línea de comandos)
 
 ```bash
 # Speak text
@@ -167,15 +167,15 @@ voice-soundboard presets
 voice-soundboard emotions
 ```
 
-## Backends
+## Backends (Servidores)
 
-| Backend | Quality | Speed | Sample Rate | Install |
-|---------|---------|-------|-------------|---------|
-| Kokoro | Excellent | Fast (GPU) | 24000 Hz | `pip install voice-soundboard[kokoro]` |
-| Piper | Great | Fast (CPU) | 22050 Hz | `pip install voice-soundboard[piper]` |
-| Mock | N/A | Instant | 24000 Hz | (built-in, for testing) |
+| Backend (Servidor) | Calidad | Speed | Frecuencia de muestreo | Instalación |
+| --------- | --------- | ------- | ------------- | --------- |
+| Kokoro | Excelente | Rápido (GPU) | 24000 Hz | `pip install voice-soundboard[kokoro]` |
+| Piper | Great | Rápido (CPU) | 22050 Hz | `pip install voice-soundboard[piper]` |
+| Mock | N/A | Instantáneo | 24000 Hz | (integrado, para pruebas) |
 
-### Kokoro Setup
+### Configuración de Kokoro
 
 ```bash
 pip install voice-soundboard[kokoro]
@@ -186,7 +186,7 @@ curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-fil
 curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
 ```
 
-### Piper Setup
+### Configuración de Piper
 
 ```bash
 pip install voice-soundboard[piper]
@@ -195,20 +195,20 @@ pip install voice-soundboard[piper]
 python -m piper.download_voices en_US-lessac-medium
 ```
 
-Piper features:
-- **30+ voices** across multiple languages (English, German, French, Spanish)
-- **Pure CPU** - no GPU required
-- **Speed control** via `length_scale` (inverted: 0.8 = faster, 1.2 = slower)
-- **Sample rate**: 22050 Hz (backend-specific)
+Características de Piper:
+- **Más de 30 voces** en múltiples idiomas (inglés, alemán, francés, español)
+- **Solo CPU** - no se requiere GPU
+- **Control de velocidad** a través de `length_scale` (inverso: 0.8 = más rápido, 1.2 = más lento)
+- **Frecuencia de muestreo**: 22050 Hz (específica del backend)
 
-Voice mapping from Kokoro:
+Mapeo de voces de Kokoro:
 ```python
 # These Kokoro voices have Piper equivalents
 engine = VoiceEngine(Config(backend="piper"))
 result = engine.speak("Hello!", voice="af_bella")  # Uses en_US_lessac_medium
 ```
 
-## Package Structure
+## Estructura del paquete
 
 ```
 voice_soundboard/
@@ -224,26 +224,26 @@ voice_soundboard/
 └── adapters/       # CLI, API, MCP (thin wrappers)
 ```
 
-**Key invariant**: `engine/` never imports from `compiler/`.
+**Invariante clave**: `engine/` nunca importa nada de `compiler/`.
 
-## Architecture Invariants
+## Invariantes de la arquitectura
 
-These rules are enforced in tests and must never be violated:
+Estas reglas se aplican en las pruebas y nunca deben violarse:
 
-1. **Engine isolation**: `engine/` never imports from `compiler/`. The engine knows nothing about emotions, styles, or presets -- only ControlGraphs.
+1. **Aislamiento del motor**: `engine/` nunca importa nada de `compiler/`. El motor no sabe nada sobre emociones, estilos ni preajustes; solo conoce los ControlGraphs.
 
-2. **Voice cloning boundary**: Raw audio never reaches the engine. The compiler extracts speaker embeddings; the engine receives only embedding vectors via `SpeakerRef`.
+2. **Límite de clonación de voz**: El audio sin procesar nunca llega al motor. El compilador extrae incrustaciones de hablantes; el motor solo recibe vectores de incrustación a través de `SpeakerRef`.
 
-3. **Graph stability**: `GRAPH_VERSION` (currently 1) is bumped on breaking changes to ControlGraph. Backends can check this for compatibility.
+3. **Estabilidad del grafo**: `GRAPH_VERSION` (actualmente 1) se actualiza cuando hay cambios importantes en el ControlGraph. Los backends pueden verificar esto para la compatibilidad.
 
 ```python
 from voice_soundboard.graph import GRAPH_VERSION, ControlGraph
 assert GRAPH_VERSION == 1
 ```
 
-## Migration from v1
+## Migración desde la versión 1
 
-The public API is unchanged:
+La API pública no ha cambiado:
 
 ```python
 # This works in both v1 and v2
@@ -252,7 +252,7 @@ engine = VoiceEngine()
 result = engine.speak("Hello!", voice="af_bella", emotion="happy")
 ```
 
-If you imported internals, see the migration mapping:
+Si importó elementos internos, consulte el mapeo de migración:
 
 | v1 | v2 |
 |----|-----|
@@ -261,6 +261,6 @@ If you imported internals, see the migration mapping:
 | `interpreter.py` | `compiler/style.py` |
 | `engines/kokoro.py` | `engine/backends/kokoro.py` |
 
-## License
+## Licencia
 
-MIT -- see [LICENSE](LICENSE) for details.
+MIT: consulte [LICENSE](LICENSE) para obtener más detalles.

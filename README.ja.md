@@ -1,8 +1,4 @@
 <p align="center">
-  <a href="README.ja.md">日本語</a> | <a href="README.zh.md">中文</a> | <a href="README.es.md">Español</a> | <a href="README.fr.md">Français</a> | <a href="README.hi.md">हिन्दी</a> | <a href="README.it.md">Italiano</a> | <a href="README.pt-BR.md">Português (BR)</a>
-</p>
-
-<p align="center">
   <img src="logo.png" alt="Voice Soundboard Logo" width="200" />
 </p>
 
@@ -34,15 +30,15 @@
 
 ---
 
-**Voice Soundboard** is a text-to-speech engine built for developers who need more than just a `.mp3` file.
+**Voice Soundboard**は、単なる`.mp3`ファイル以上の機能が必要な開発者向けのテキスト読み上げエンジンです。
 
-Most TTS libraries force a choice: easy APIs that hide everything, or complex lower-level tools that require audio engineering knowledge. Voice Soundboard gives you the best of both worlds.
+多くのTTSライブラリでは、使いやすいAPIを提供する一方で、内部構造が隠されているか、または高度な知識を必要とする複雑なツールしか提供されていません。Voice Soundboardは、その両方の利点を兼ね備えています。
 
-*   **Simple High-Level API**: Just call `engine.speak("Hello")` and get audio.
-*   **Powerful Internals**: Under the hood, we use a Compiler/Graph/Engine architecture that separates *what* is said (intent, emotion) from *how* it's rendered (backend, audio format).
-*   **Zero-Cost Abstractions**: Emotions, styles, and SSML are compiled into a control graph, so the runtime engine stays fast and lightweight.
+*   **シンプルで高レベルなAPI**: `engine.speak("Hello")`と呼び出すだけで、音声が得られます。
+*   **強力な内部構造**: 内部では、コンパイラ/グラフ/エンジンというアーキテクチャを採用しており、発話内容（意図、感情）と、その表現方法（バックエンド、音声フォーマット）を分離しています。
+*   **オーバーヘッドのない機能**: 感情、スタイル、SSMLなどは、制御グラフにコンパイルされるため、実行時のエンジンは高速で軽量です。
 
-## Quick Start
+## クイックスタート
 
 ```bash
 pip install voice-soundboard
@@ -57,7 +53,7 @@ result = engine.speak("Hello world! This is my AI voice.")
 print(f"Saved to: {result.audio_path}")
 ```
 
-## Architecture
+## アーキテクチャ
 
 ```
 compile_request("text", emotion="happy")
@@ -69,18 +65,18 @@ compile_request("text", emotion="happy")
     PCM audio (numpy array)
 ```
 
-**The compiler** transforms intent (text + emotion + style) into a `ControlGraph`.
+**コンパイラ**は、意図（テキスト + 感情 + スタイル）を`ControlGraph`に変換します。
 
-**The engine** transforms the graph into audio. It knows nothing about emotions or styles.
+**エンジン**は、グラフを音声に変換します。エンジンは、感情やスタイルに関する知識を持ちません。
 
-This separation means:
-- Features are "free" at runtime (already baked into the graph)
-- Engine is tiny, fast, testable
-- Backends are swappable without touching feature logic
+この分離により、以下の利点があります。
+- 実行時の機能は「無料」（グラフに組み込まれている）
+- エンジンは小さく、高速で、テスト可能
+- バックエンドを機能ロジックを変更せずに置き換え可能
 
-## Usage
+## 使い方
 
-### Basic
+### 基本
 
 ```python
 from voice_soundboard import VoiceEngine
@@ -103,7 +99,7 @@ result = engine.speak("I'm so happy!", emotion="excited")
 result = engine.speak("Good morning!", style="warmly and cheerfully")
 ```
 
-### Advanced: Direct Graph Manipulation
+### 応用編：グラフの直接操作
 
 ```python
 from voice_soundboard.compiler import compile_request
@@ -121,14 +117,14 @@ backend = load_backend("kokoro")
 audio = backend.synthesize(graph)
 ```
 
-### Streaming
+### ストリーミング
 
-Streaming operates at two levels:
+ストリーミングは、2つのレベルで動作します。
 
-1. **Graph streaming**: `compile_stream()` yields ControlGraphs as sentence boundaries are detected
-2. **Audio streaming**: `StreamingSynthesizer` chunks audio for real-time playback
+1. **グラフストリーミング**: `compile_stream()`は、文の区切りが検出されるたびに`ControlGraph`を生成します。
+2. **音声ストリーミング**: `StreamingSynthesizer`は、音声をチャンクに分割してリアルタイムで再生します。
 
-**Note**: This is sentence-level streaming, not word-by-word incremental synthesis. The compiler waits for sentence boundaries before yielding graphs. True incremental synthesis (speculative execution with rollback) is architecturally supported but not yet implemented.
+**注意**: これは文レベルのストリーミングであり、単語ごとの逐次合成ではありません。コンパイラは、グラフを生成する前に文の区切りを待ちます。真の逐次合成（ロールバック付きの推測的実行）は、アーキテクチャ的にサポートされていますが、まだ実装されていません。
 
 ```python
 from voice_soundboard.compiler import compile_stream
@@ -148,7 +144,7 @@ for graph in compile_stream(text_chunks()):
         play(audio_chunk)
 ```
 
-## CLI
+## CLI（コマンドラインインターフェース）
 
 ```bash
 # Speak text
@@ -167,15 +163,15 @@ voice-soundboard presets
 voice-soundboard emotions
 ```
 
-## Backends
+## バックエンド
 
-| Backend | Quality | Speed | Sample Rate | Install |
-|---------|---------|-------|-------------|---------|
-| Kokoro | Excellent | Fast (GPU) | 24000 Hz | `pip install voice-soundboard[kokoro]` |
-| Piper | Great | Fast (CPU) | 22050 Hz | `pip install voice-soundboard[piper]` |
-| Mock | N/A | Instant | 24000 Hz | (built-in, for testing) |
+| バックエンド | 品質 | Speed | サンプリングレート | インストール |
+| --------- | --------- | ------- | ------------- | --------- |
+| Kokoro | 優れている | 高速（GPU） | 24000 Hz | `pip install voice-soundboard[kokoro]` |
+| Piper | Great | 高速（CPU） | 22050 Hz | `pip install voice-soundboard[piper]` |
+| Mock | N/A | 即時 | 24000 Hz | （内蔵、テスト用） |
 
-### Kokoro Setup
+### Kokoroの設定
 
 ```bash
 pip install voice-soundboard[kokoro]
@@ -186,7 +182,7 @@ curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-fil
 curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
 ```
 
-### Piper Setup
+### Piperの設定
 
 ```bash
 pip install voice-soundboard[piper]
@@ -195,20 +191,20 @@ pip install voice-soundboard[piper]
 python -m piper.download_voices en_US-lessac-medium
 ```
 
-Piper features:
-- **30+ voices** across multiple languages (English, German, French, Spanish)
-- **Pure CPU** - no GPU required
-- **Speed control** via `length_scale` (inverted: 0.8 = faster, 1.2 = slower)
-- **Sample rate**: 22050 Hz (backend-specific)
+Piperの特徴：
+- **30種類以上の音声**（複数の言語：英語、ドイツ語、フランス語、スペイン語）
+- **CPUのみ** - GPUは不要
+- **速度制御**: `length_scale`で調整（0.8 = 高速、1.2 = 低速）
+- **サンプリングレート**: 22050 Hz（バックエンドによって異なる）
 
-Voice mapping from Kokoro:
+Kokoroからの音声マッピング
 ```python
 # These Kokoro voices have Piper equivalents
 engine = VoiceEngine(Config(backend="piper"))
 result = engine.speak("Hello!", voice="af_bella")  # Uses en_US_lessac_medium
 ```
 
-## Package Structure
+## パッケージ構成
 
 ```
 voice_soundboard/
@@ -224,26 +220,26 @@ voice_soundboard/
 └── adapters/       # CLI, API, MCP (thin wrappers)
 ```
 
-**Key invariant**: `engine/` never imports from `compiler/`.
+**重要なルール**: `engine/`は、`compiler/`からインポートしてはいけません。
 
-## Architecture Invariants
+## アーキテクチャの制約
 
-These rules are enforced in tests and must never be violated:
+これらのルールはテストで検証され、決して破られてはなりません。
 
-1. **Engine isolation**: `engine/` never imports from `compiler/`. The engine knows nothing about emotions, styles, or presets -- only ControlGraphs.
+1. **エンジンの分離**: `engine/`は、`compiler/`からインポートしてはいけません。エンジンは、感情、スタイル、プリセットに関する知識を持たず、`ControlGraph`のみを認識します。
 
-2. **Voice cloning boundary**: Raw audio never reaches the engine. The compiler extracts speaker embeddings; the engine receives only embedding vectors via `SpeakerRef`.
+2. **音声クローニングの境界**: 生の音声は、エンジンに到達しません。コンパイラは、話者埋め込み情報を抽出し、エンジンは`SpeakerRef`を介して埋め込みベクトルのみを受け取ります。
 
-3. **Graph stability**: `GRAPH_VERSION` (currently 1) is bumped on breaking changes to ControlGraph. Backends can check this for compatibility.
+3. **グラフの安定性**: `GRAPH_VERSION`（現在は1）は、`ControlGraph`の互換性を壊す変更があった場合にのみ変更されます。バックエンドは、このバージョンを確認して互換性を判断できます。
 
 ```python
 from voice_soundboard.graph import GRAPH_VERSION, ControlGraph
 assert GRAPH_VERSION == 1
 ```
 
-## Migration from v1
+## v1からの移行
 
-The public API is unchanged:
+公開APIは変更されていません。
 
 ```python
 # This works in both v1 and v2
@@ -252,7 +248,7 @@ engine = VoiceEngine()
 result = engine.speak("Hello!", voice="af_bella", emotion="happy")
 ```
 
-If you imported internals, see the migration mapping:
+内部APIを使用していた場合は、移行マッピングを参照してください。
 
 | v1 | v2 |
 |----|-----|
@@ -261,6 +257,6 @@ If you imported internals, see the migration mapping:
 | `interpreter.py` | `compiler/style.py` |
 | `engines/kokoro.py` | `engine/backends/kokoro.py` |
 
-## License
+## ライセンス
 
-MIT -- see [LICENSE](LICENSE) for details.
+MIT -- 詳細については、[LICENSE](LICENSE)を参照してください。
