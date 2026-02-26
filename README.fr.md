@@ -3,9 +3,7 @@
 </p>
 
 <p align="center">
-  
-            <img src="https://raw.githubusercontent.com/mcp-tool-shop-org/brand/main/logos/voice-soundboard/readme.png"
-           alt="Voice Soundboard Logo" width="200" />
+  <img src="logo.png" alt="Voice Soundboard Logo" width="200" />
 </p>
 
 <p align="center">
