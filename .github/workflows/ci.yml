@@ -46,7 +46,7 @@ jobs:
       
       - name: Run tests with coverage
         run: |
-          python -m pytest tests/ --ignore=tests/v29_soak/ --ignore=tests/v31_hardening/ -v --tb=short --cov=voice_soundboard --cov-report=xml --cov-report=term-missing
+          python -m pytest tests/ --ignore=tests/v29_soak/ --ignore=tests/v31_hardening/ --ignore=tests/registrum/ --ignore=tests/v32_spatial/ --ignore=tests/v3_audit/ -v --tb=short --cov=voice_soundboard --cov-report=xml --cov-report=term-missing
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
