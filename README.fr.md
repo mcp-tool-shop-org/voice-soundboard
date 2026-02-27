@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="README.ja.md">日本語</a> | <a href="README.zh.md">中文</a> | <a href="README.es.md">Español</a> | <a href="README.fr.md">Français</a> | <a href="README.hi.md">हिन्दी</a> | <a href="README.it.md">Italiano</a> | <a href="README.pt-BR.md">Português (BR)</a>
+  <a href="README.ja.md">日本語</a> | <a href="README.zh.md">中文</a> | <a href="README.es.md">Español</a> | <a href="README.md">English</a> | <a href="README.hi.md">हिन्दी</a> | <a href="README.it.md">Italiano</a> | <a href="README.pt-BR.md">Português (BR)</a>
 </p>
 
 <p align="center">
@@ -16,6 +16,9 @@
     </a>
     <a href="https://github.com/mcp-tool-shop-org/voice-soundboard/actions/workflows/ci.yml">
         <img src="https://github.com/mcp-tool-shop-org/voice-soundboard/actions/workflows/ci.yml/badge.svg" alt="CI">
+    </a>
+    <a href="https://codecov.io/gh/mcp-tool-shop-org/voice-soundboard">
+        <img src="https://codecov.io/gh/mcp-tool-shop-org/voice-soundboard/branch/main/graph/badge.svg" alt="Codecov">
     </a>
     <a href="https://www.python.org/downloads/">
         <img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python 3.10+">
@@ -75,7 +78,7 @@ compile_request("text", emotion="happy")
 
 Cette séparation signifie :
 - Les fonctionnalités sont "gratuites" au moment de l'exécution (déjà intégrées dans le graphe)
-- Le moteur est petit, rapide et testable
+- Le moteur est minuscule, rapide et testable
 - Les backends peuvent être échangés sans modifier la logique des fonctionnalités
 
 ## Utilisation
@@ -125,8 +128,8 @@ audio = backend.synthesize(graph)
 
 Le streaming fonctionne à deux niveaux :
 
-1. **Streaming du graphe** : `compile_stream()` renvoie des graphes de contrôle à chaque délimitation de phrase.
-2. **Streaming audio** : `StreamingSynthesizer` découpe l'audio pour une lecture en temps réel.
+1. **Streaming du graphe** : `compile_stream()` renvoie des ControlGraphs lorsque les limites des phrases sont détectées.
+2. **Streaming audio** : `StreamingSynthesizer` découpe l'audio pour la lecture en temps réel.
 
 **Remarque** : Il s'agit d'un streaming au niveau de la phrase, et non d'une synthèse incrémentale mot par mot. Le compilateur attend la fin des phrases avant de renvoyer les graphes. La synthèse incrémentale réelle (exécution spéculative avec retour en arrière) est prise en charge architecturalement, mais n'est pas encore implémentée.
 
@@ -148,7 +151,7 @@ for graph in compile_stream(text_chunks()):
         play(audio_chunk)
 ```
 
-## CLI (Interface en ligne de commande)
+## Ligne de commande (CLI)
 
 ```bash
 # Speak text
@@ -167,12 +170,12 @@ voice-soundboard presets
 voice-soundboard emotions
 ```
 
-## Backends (Serveurs)
+## Backends
 
-| Backend (Serveur) | Qualité | Speed | Taux d'échantillonnage | Installation |
-| --------- | --------- | ------- | ------------- | --------- |
+| Backend | Qualité | Vitesse | Taux d'échantillonnage | Installation |
+|---------|---------|-------|-------------|---------|
 | Kokoro | Excellent | Rapide (GPU) | 24000 Hz | `pip install voice-soundboard[kokoro]` |
-| Piper | Great | Rapide (CPU) | 22050 Hz | `pip install voice-soundboard[piper]` |
+| Piper | Très bien | Rapide (CPU) | 22050 Hz | `pip install voice-soundboard[piper]` |
 | Mock | N/A | Instantané | 24000 Hz | (intégré, pour les tests) |
 
 ### Configuration de Kokoro
@@ -197,7 +200,7 @@ python -m piper.download_voices en_US-lessac-medium
 
 Fonctionnalités de Piper :
 - **Plus de 30 voix** dans plusieurs langues (anglais, allemand, français, espagnol)
-- **Purement CPU** - pas de GPU requis
+- **Purement CPU** - aucun GPU requis
 - **Contrôle de la vitesse** via `length_scale` (inversé : 0,8 = plus rapide, 1,2 = plus lent)
 - **Taux d'échantillonnage** : 22050 Hz (spécifique au backend)
 
@@ -224,17 +227,17 @@ voice_soundboard/
 └── adapters/       # CLI, API, MCP (thin wrappers)
 ```
 
-**Invariant clé** : `engine/` n'importe jamais de `compiler/`.
+**Invariant clé** : Le répertoire `engine/` n'importe jamais de `compiler/`.
 
 ## Invariants de l'architecture
 
 Ces règles sont appliquées par des tests et ne doivent jamais être violées :
 
-1. **Isolation du moteur** : `engine/` n'importe jamais de `compiler/`. Le moteur ne connaît rien des émotions, des styles ou des préréglages, seulement des graphes de contrôle.
+1. **Isolation du moteur** : Le répertoire `engine/` n'importe jamais de `compiler/`. Le moteur ne connaît rien des émotions, des styles ou des préréglages, seulement des ControlGraphs.
 
-2. **Frontière de clonage vocal** : L'audio brut n'atteint jamais le moteur. Le compilateur extrait les embeddings du locuteur ; le moteur reçoit uniquement des vecteurs d'embedding via `SpeakerRef`.
+2. **Frontière du clonage vocal** : L'audio brut n'atteint jamais le moteur. Le compilateur extrait les embeddings du locuteur ; le moteur reçoit uniquement des vecteurs d'embedding via `SpeakerRef`.
 
-3. **Stabilité du graphe** : `GRAPH_VERSION` (actuellement 1) est incrémenté en cas de modifications majeures du `ControlGraph`. Les backends peuvent vérifier cela pour la compatibilité.
+3. **Stabilité du graphe** : `GRAPH_VERSION` (actuellement 1) est incrémenté en cas de modifications majeures du ControlGraph. Les backends peuvent vérifier cela pour la compatibilité.
 
 ```python
 from voice_soundboard.graph import GRAPH_VERSION, ControlGraph
@@ -261,6 +264,31 @@ Si vous avez importé des éléments internes, consultez la correspondance de mi
 | `interpreter.py` | `compiler/style.py` |
 | `engines/kokoro.py` | `engine/backends/kokoro.py` |
 
+## Sécurité et portée des données
+
+- **Données consultées :** Lit les données textuelles pour la synthèse vocale. Traite l'audio via les backends configurés (Kokoro, Piper ou un système de simulation). Renvoie l'audio PCM sous forme de tableaux NumPy ou de fichiers WAV.
+- **Données non consultées :** Par défaut, aucune communication réseau (les backends sont locaux). Aucune télémétrie, analyse ou suivi. Aucun stockage de données utilisateur au-delà des tampons audio temporaires.
+- **Autorisations requises :** Accès en lecture aux fichiers du modèle de synthèse vocale. Accès en écriture optionnel pour la sortie audio.
+
+Consultez le fichier [SECURITY.md](SECURITY.md) pour signaler les vulnérabilités.
+
+## Tableau de bord
+
+| Catégorie | Score |
+|----------|-------|
+| A. Sécurité | 10/10 |
+| B. Gestion des erreurs | 10/10 |
+| C. Documentation pour les utilisateurs | 10/10 |
+| D. Bonnes pratiques de développement | 10/10 |
+| E. Identification (logicielle) | 10/10 |
+| **Overall** | **50/50** |
+
+> Évalué avec [`@mcptoolshop/shipcheck`](https://github.com/mcp-tool-shop-org/shipcheck)
+
 ## Licence
 
 MIT -- voir [LICENSE](LICENSE) pour plus de détails.
+
+---
+
+Créé par [MCP Tool Shop](https://mcp-tool-shop.github.io/)

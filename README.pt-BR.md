@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="README.ja.md">日本語</a> | <a href="README.zh.md">中文</a> | <a href="README.es.md">Español</a> | <a href="README.fr.md">Français</a> | <a href="README.hi.md">हिन्दी</a> | <a href="README.it.md">Italiano</a> | <a href="README.pt-BR.md">Português (BR)</a>
+  <a href="README.ja.md">日本語</a> | <a href="README.zh.md">中文</a> | <a href="README.es.md">Español</a> | <a href="README.fr.md">Français</a> | <a href="README.hi.md">हिन्दी</a> | <a href="README.it.md">Italiano</a> | <a href="README.md">English</a>
 </p>
 
 <p align="center">
@@ -16,6 +16,9 @@
     </a>
     <a href="https://github.com/mcp-tool-shop-org/voice-soundboard/actions/workflows/ci.yml">
         <img src="https://github.com/mcp-tool-shop-org/voice-soundboard/actions/workflows/ci.yml/badge.svg" alt="CI">
+    </a>
+    <a href="https://codecov.io/gh/mcp-tool-shop-org/voice-soundboard">
+        <img src="https://codecov.io/gh/mcp-tool-shop-org/voice-soundboard/branch/main/graph/badge.svg" alt="Codecov">
     </a>
     <a href="https://www.python.org/downloads/">
         <img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python 3.10+">
@@ -36,7 +39,7 @@
 
 **Voice Soundboard** é um motor de texto para fala desenvolvido para programadores que precisam de mais do que apenas um arquivo `.mp3`.
 
-A maioria das bibliotecas de TTS (Text-to-Speech) oferece uma escolha: APIs simples que escondem tudo, ou ferramentas complexas de baixo nível que exigem conhecimento em engenharia de áudio. O Voice Soundboard oferece o melhor dos dois mundos.
+A maioria das bibliotecas de TTS (Text-to-Speech) oferece uma escolha: APIs simples que escondem tudo, ou ferramentas de baixo nível e complexas que exigem conhecimento em engenharia de áudio. O Voice Soundboard oferece o melhor dos dois mundos.
 
 *   **API de alto nível simples**: Basta chamar `engine.speak("Olá")` e obter o áudio.
 *   **Funcionalidades avançadas**: Por baixo, usamos uma arquitetura de compilador/grafo/motor que separa o *que* é dito (intenção, emoção) de *como* é renderizado (backend, formato de áudio).
@@ -74,7 +77,7 @@ compile_request("text", emotion="happy")
 **O motor** transforma o grafo em áudio. Ele não sabe nada sobre emoções ou estilos.
 
 Essa separação significa:
-- As funcionalidades são "gratuitas" em tempo de execução (já incorporadas no grafo)
+- Recursos são "gratuitos" em tempo de execução (já incorporados no grafo)
 - O motor é pequeno, rápido e testável
 - Os backends podem ser substituídos sem alterar a lógica das funcionalidades
 
@@ -125,10 +128,10 @@ audio = backend.synthesize(graph)
 
 O streaming opera em dois níveis:
 
-1. **Streaming do grafo**: `compile_stream()` gera ControlGraphs à medida que os limites das frases são detectados.
+1. **Streaming do grafo**: `compile_stream()` retorna ControlGraphs à medida que os limites das frases são detectados.
 2. **Streaming de áudio**: `StreamingSynthesizer` divide o áudio em partes para reprodução em tempo real.
 
-**Observação**: Este é um streaming em nível de frase, não uma síntese incremental palavra por palavra. O compilador espera os limites das frases antes de gerar os grafos. A síntese incremental verdadeira (execução especulativa com reversão) é suportada arquiteturalmente, mas ainda não foi implementada.
+**Observação**: Este é um streaming em nível de frase, não uma síntese incremental palavra por palavra. O compilador espera os limites das frases antes de retornar os grafos. A síntese incremental verdadeira (execução especulativa com reversão) é suportada arquiteturalmente, mas ainda não foi implementada.
 
 ```python
 from voice_soundboard.compiler import compile_stream
@@ -169,11 +172,11 @@ voice-soundboard emotions
 
 ## Backends
 
-| Backend (Servidor de Áudio) | Qualidade | Speed | Taxa de amostragem | Instalação |
-| --------- | --------- | ------- | ------------- | --------- |
+| Backend (Servidor de Áudio) | Qualidade | Velocidade | Taxa de amostragem | Instalação |
+|---------|---------|-------|-------------|---------|
 | Kokoro | Excelente | Rápido (GPU) | 24000 Hz | `pip install voice-soundboard[kokoro]` |
-| Piper | Great | Rápido (CPU) | 22050 Hz | `pip install voice-soundboard[piper]` |
-| Mock | N/A | Instantâneo | 24000 Hz | (integrado, para testes) |
+| Piper | Ótimo | Rápido (CPU) | 22050 Hz | `pip install voice-soundboard[piper]` |
+| Mock (Simulação) | N/A (Não aplicável) | Instantâneo | 24000 Hz | (integrado, para testes) |
 
 ### Configuração do Kokoro
 
@@ -208,7 +211,7 @@ engine = VoiceEngine(Config(backend="piper"))
 result = engine.speak("Hello!", voice="af_bella")  # Uses en_US_lessac_medium
 ```
 
-## Estrutura do Pacote
+## Estrutura do pacote
 
 ```
 voice_soundboard/
@@ -226,11 +229,11 @@ voice_soundboard/
 
 **Invariante chave**: O diretório `engine/` nunca importa nada do diretório `compiler/`.
 
-## Invariantes da Arquitetura
+## Invariantes da arquitetura
 
 Essas regras são aplicadas em testes e nunca devem ser violadas:
 
-1. **Isolamento do motor**: O diretório `engine/` nunca importa nada do diretório `compiler/`. O motor não sabe nada sobre emoções, estilos ou configurações predefinidas -- apenas ControlGraphs.
+1. **Isolamento do motor**: O diretório `engine/` nunca importa nada do diretório `compiler/`. O motor não sabe nada sobre emoções, estilos ou configurações predefinidas - apenas ControlGraphs.
 
 2. **Limite de clonagem de voz**: O áudio bruto nunca chega ao motor. O compilador extrai as características do falante; o motor recebe apenas vetores de características via `SpeakerRef`.
 
@@ -261,6 +264,31 @@ Se você importou elementos internos, consulte o mapeamento de migração:
 | `interpreter.py` | `compiler/style.py` |
 | `engines/kokoro.py` | `engine/backends/kokoro.py` |
 
+## Segurança e escopo de dados
+
+- **Dados acessados:** Lê a entrada de texto para a síntese de voz. Processa o áudio através dos backends configurados (Kokoro, Piper ou um simulador). Retorna o áudio em formato PCM como arrays NumPy ou arquivos WAV.
+- **Dados NÃO acessados:** Por padrão, não há tráfego de rede (os backends são locais). Não há telemetria, análise ou rastreamento. Não há armazenamento de dados do usuário além de buffers de áudio temporários.
+- **Permissões necessárias:** Acesso de leitura aos arquivos do modelo de síntese de voz. Acesso de escrita opcional para a saída de áudio.
+
+Consulte o arquivo [SECURITY.md](SECURITY.md) para relatar vulnerabilidades.
+
+## Tabela de avaliação
+
+| Categoria | Pontuação |
+|----------|-------|
+| A. Segurança | 10/10 |
+| B. Tratamento de erros | 10/10 |
+| C. Documentação para o usuário | 10/10 |
+| D. Boas práticas de desenvolvimento | 10/10 |
+| E. Identidade (suave) | 10/10 |
+| **Overall** | **50/50** |
+
+> Avaliado com [`@mcptoolshop/shipcheck`](https://github.com/mcp-tool-shop-org/shipcheck)
+
 ## Licença
 
 MIT -- veja [LICENSE](LICENSE) para detalhes.
+
+---
+
+Desenvolvido por [MCP Tool Shop](https://mcp-tool-shop.github.io/)

@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="README.ja.md">日本語</a> | <a href="README.zh.md">中文</a> | <a href="README.es.md">Español</a> | <a href="README.fr.md">Français</a> | <a href="README.hi.md">हिन्दी</a> | <a href="README.it.md">Italiano</a> | <a href="README.pt-BR.md">Português (BR)</a>
+  <a href="README.ja.md">日本語</a> | <a href="README.zh.md">中文</a> | <a href="README.md">English</a> | <a href="README.fr.md">Français</a> | <a href="README.hi.md">हिन्दी</a> | <a href="README.it.md">Italiano</a> | <a href="README.pt-BR.md">Português (BR)</a>
 </p>
 
 <p align="center">
@@ -16,6 +16,9 @@
     </a>
     <a href="https://github.com/mcp-tool-shop-org/voice-soundboard/actions/workflows/ci.yml">
         <img src="https://github.com/mcp-tool-shop-org/voice-soundboard/actions/workflows/ci.yml/badge.svg" alt="CI">
+    </a>
+    <a href="https://codecov.io/gh/mcp-tool-shop-org/voice-soundboard">
+        <img src="https://codecov.io/gh/mcp-tool-shop-org/voice-soundboard/branch/main/graph/badge.svg" alt="Codecov">
     </a>
     <a href="https://www.python.org/downloads/">
         <img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python 3.10+">
@@ -36,13 +39,13 @@
 
 **Voice Soundboard** es un motor de texto a voz diseñado para desarrolladores que necesitan algo más que un simple archivo `.mp3`.
 
-La mayoría de las bibliotecas de TTS ofrecen una elección: APIs sencillas que ocultan todo, o herramientas de bajo nivel y complejas que requieren conocimientos de ingeniería de audio. Voice Soundboard le ofrece lo mejor de ambos mundos.
+La mayoría de las bibliotecas de TTS ofrecen una elección limitada: APIs sencillas que ocultan todo, o herramientas de bajo nivel y complejas que requieren conocimientos de ingeniería de audio. Voice Soundboard le ofrece lo mejor de ambos mundos.
 
 *   **API de alto nivel sencilla**: Simplemente llame a `engine.speak("Hola")` y obtenga el audio.
-*   **Internos potentes**: En el núcleo, utilizamos una arquitectura de compilador/grafo/motor que separa *lo que* se dice (intención, emoción) de *cómo* se reproduce (backend, formato de audio).
-*   **Abstracciones de costo cero**: Las emociones, los estilos y el SSML se compilan en un grafo de control, por lo que el motor de ejecución permanece rápido y ligero.
+*   **Internos potentes**: En el núcleo, utilizamos una arquitectura de Compilador/Gráfico/Motor que separa *lo que* se dice (intención, emoción) de *cómo* se reproduce (backend, formato de audio).
+*   **Abstracciones sin costo adicional**: Las emociones, los estilos y el SSML se compilan en un gráfico de control, por lo que el motor de ejecución permanece rápido y ligero.
 
-## Inicio rápido
+## Comienzo rápido
 
 ```bash
 pip install voice-soundboard
@@ -71,10 +74,10 @@ compile_request("text", emotion="happy")
 
 **El compilador** transforma la intención (texto + emoción + estilo) en un `ControlGraph`.
 
-**El motor** transforma el grafo en audio. No sabe nada sobre emociones ni estilos.
+**El motor** transforma el gráfico en audio. No sabe nada sobre emociones ni estilos.
 
 Esta separación significa:
-- Las funciones son "gratuitas" en tiempo de ejecución (ya están integradas en el grafo).
+- Las funciones son "gratuitas" en tiempo de ejecución (ya están integradas en el gráfico).
 - El motor es pequeño, rápido y fácil de probar.
 - Los backends se pueden cambiar sin modificar la lógica de las funciones.
 
@@ -103,7 +106,7 @@ result = engine.speak("I'm so happy!", emotion="excited")
 result = engine.speak("Good morning!", style="warmly and cheerfully")
 ```
 
-### Avanzado: Manipulación directa del grafo
+### Avanzado: Manipulación directa del gráfico
 
 ```python
 from voice_soundboard.compiler import compile_request
@@ -125,10 +128,10 @@ audio = backend.synthesize(graph)
 
 La transmisión opera en dos niveles:
 
-1. **Transmisión de grafos**: `compile_stream()` genera grafos de control a medida que se detectan los límites de las oraciones.
+1. **Transmisión de gráficos**: `compile_stream()` genera ControlGraphs a medida que se detectan los límites de las oraciones.
 2. **Transmisión de audio**: `StreamingSynthesizer` divide el audio para la reproducción en tiempo real.
 
-**Nota**: Esto es una transmisión a nivel de oración, no una síntesis incremental palabra por palabra. El compilador espera los límites de las oraciones antes de generar los grafos. La síntesis incremental verdadera (ejecución especulativa con retroceso) está soportada arquitectónicamente, pero aún no está implementada.
+**Nota**: Esto es una transmisión a nivel de oración, no una síntesis incremental palabra por palabra. El compilador espera los límites de las oraciones antes de generar gráficos. La síntesis incremental verdadera (ejecución especulativa con retroceso) está soportada arquitectónicamente, pero aún no está implementada.
 
 ```python
 from voice_soundboard.compiler import compile_stream
@@ -169,11 +172,11 @@ voice-soundboard emotions
 
 ## Backends (Servidores)
 
-| Backend (Servidor) | Calidad | Speed | Frecuencia de muestreo | Instalación |
-| --------- | --------- | ------- | ------------- | --------- |
+| Backend (Servidor) | Calidad | Velocidad | Frecuencia de muestreo | Instalación |
+|---------|---------|-------|-------------|---------|
 | Kokoro | Excelente | Rápido (GPU) | 24000 Hz | `pip install voice-soundboard[kokoro]` |
-| Piper | Great | Rápido (CPU) | 22050 Hz | `pip install voice-soundboard[piper]` |
-| Mock | N/A | Instantáneo | 24000 Hz | (integrado, para pruebas) |
+| Piper | Muy bueno | Rápido (CPU) | 22050 Hz | `pip install voice-soundboard[piper]` |
+| Mock (Simulación) | N/A (No disponible) | Instantáneo (Inmediato) | 24000 Hz | (integrado, para pruebas) |
 
 ### Configuración de Kokoro
 
@@ -230,11 +233,11 @@ voice_soundboard/
 
 Estas reglas se aplican en las pruebas y nunca deben violarse:
 
-1. **Aislamiento del motor**: `engine/` nunca importa nada de `compiler/`. El motor no sabe nada sobre emociones, estilos ni preajustes; solo conoce los ControlGraphs.
+1. **Aislamiento del motor**: `engine/` nunca importa nada de `compiler/`. El motor no sabe nada sobre emociones, estilos ni configuraciones preestablecidas; solo conoce los ControlGraphs.
 
 2. **Límite de clonación de voz**: El audio sin procesar nunca llega al motor. El compilador extrae incrustaciones de hablantes; el motor solo recibe vectores de incrustación a través de `SpeakerRef`.
 
-3. **Estabilidad del grafo**: `GRAPH_VERSION` (actualmente 1) se actualiza cuando hay cambios importantes en el ControlGraph. Los backends pueden verificar esto para la compatibilidad.
+3. **Estabilidad del gráfico**: `GRAPH_VERSION` (actualmente 1) se actualiza cuando hay cambios importantes en el ControlGraph. Los backends pueden verificar esto para la compatibilidad.
 
 ```python
 from voice_soundboard.graph import GRAPH_VERSION, ControlGraph
@@ -261,6 +264,31 @@ Si importó elementos internos, consulte el mapeo de migración:
 | `interpreter.py` | `compiler/style.py` |
 | `engines/kokoro.py` | `engine/backends/kokoro.py` |
 
+## Seguridad y alcance de datos
+
+- **Datos accedidos:** Lee la entrada de texto para la síntesis de voz. Procesa el audio a través de los backends configurados (Kokoro, Piper o un entorno de prueba). Devuelve audio en formato PCM como arreglos de numpy o archivos WAV.
+- **Datos NO accedidos:** Por defecto, no hay comunicación de red (los backends son locales). No hay telemetría, análisis ni seguimiento. No se almacena ningún dato de usuario más allá de los búferes de audio temporales.
+- **Permisos requeridos:** Acceso de lectura a los archivos del modelo de síntesis de voz. Acceso de escritura opcional para la salida de audio.
+
+Consulte [SECURITY.md](SECURITY.md) para informar sobre vulnerabilidades.
+
+## Cuadro de evaluación
+
+| Categoría | Puntuación |
+|----------|-------|
+| A. Seguridad | 10/10 |
+| B. Manejo de errores | 10/10 |
+| C. Documentación para el usuario | 10/10 |
+| D. Higiene en el desarrollo | 10/10 |
+| E. Identificación (suave) | 10/10 |
+| **Overall** | **50/50** |
+
+> Evaluado con [`@mcptoolshop/shipcheck`](https://github.com/mcp-tool-shop-org/shipcheck)
+
 ## Licencia
 
 MIT: consulte [LICENSE](LICENSE) para obtener más detalles.
+
+---
+
+Desarrollado por [MCP Tool Shop](https://mcp-tool-shop.github.io/)
