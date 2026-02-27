@@ -1,6 +1,6 @@
 [project]
 name = "voice-soundboard"
-version = "2.6.2"
+version = "2.6.3"
 description = "Text-to-speech for AI agents and developers. Compiler → Graph → Engine architecture."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -81,7 +81,10 @@ mcp-server = [
 dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0",
     "hypothesis>=6.100.0",
+    "ruff>=0.3",
+    "pip-audit>=2.7.0",
 ]
 all = [
     "kokoro-onnx>=0.4.0",

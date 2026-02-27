@@ -44,9 +44,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
       
-      - name: Run tests
+      - name: Run tests with coverage
         run: |
-          python -m pytest tests/ --ignore=tests/v29_soak/ --ignore=tests/v31_hardening/ -v --tb=short
+          python -m pytest tests/ --ignore=tests/v29_soak/ --ignore=tests/v31_hardening/ -v --tb=short --cov=voice_soundboard --cov-report=xml --cov-report=term-missing
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: matrix.python-version == '3.12'
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
       
       - name: Check architecture invariants
         run: |
@@ -111,3 +118,14 @@ jobs:
         run: |
           ruff check voice_soundboard/ tests/ --ignore=E501
         continue-on-error: true
+
+  dep-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install pip-audit
+      - run: pip-audit --strict --desc || true

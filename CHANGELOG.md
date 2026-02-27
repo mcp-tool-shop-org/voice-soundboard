@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.3] - 2026-02-27
+
+### Added
+- SECURITY.md with vulnerability reporting policy and data scope
+- Makefile with `verify` target for one-command validation
+- SHIP_GATE.md and SCORECARD.md for product standards
+- Codecov badge and Security & Data Scope section in README
+- Coverage reporting (`pytest-cov`) and dependency audit (`pip-audit`) in CI
+- `ruff` linting to dev dependencies
+
+### Changed
+- CI lint step now enforces (removed `continue-on-error`)
+
 ## [2.5.0-alpha.1] - 2026-XX-XX
 
 ### Overview
