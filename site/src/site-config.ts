@@ -14,7 +14,7 @@ export const config: SiteConfig = {
     headlineAccent: 'TTS for AI agents.',
     description: 'A text-to-speech engine that separates what is said from how it\u2019s rendered. Compiler \u2192 Graph \u2192 Engine architecture with swappable backends.',
     primaryCta: { href: '#usage', label: 'Get started' },
-    secondaryCta: { href: '#architecture', label: 'How it works' },
+    secondaryCta: { href: 'handbook/', label: 'Read the Handbook' },
     previews: [
       { label: 'Install', code: 'pip install voice-soundboard' },
       { label: 'Speak', code: "engine.speak('Hello world!')" },
