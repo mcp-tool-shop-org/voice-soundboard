@@ -176,6 +176,10 @@ voice-soundboard emotions
 |---------|---------|-------|-------------|---------|
 | Kokoro | Excellent | Fast (GPU) | 24000 Hz | `pip install voice-soundboard[kokoro]` |
 | Piper | Great | Fast (CPU) | 22050 Hz | `pip install voice-soundboard[piper]` |
+| OpenAI | Excellent | Cloud | 24000 Hz | `pip install voice-soundboard[openai]` |
+| Coqui | Great | Moderate (GPU) | 22050 Hz | `pip install voice-soundboard[coqui]` |
+| ElevenLabs | Premium | Cloud | 44100 Hz | `pip install voice-soundboard[elevenlabs]` |
+| Azure | Excellent | Cloud | 24000 Hz | `pip install voice-soundboard[azure]` |
 | Mock | N/A | Instant | 24000 Hz | (built-in, for testing) |
 
 ### Kokoro Setup
@@ -222,7 +226,7 @@ voice_soundboard/
 │   ├── style.py    # Natural language style
 │   └── compile.py  # Main entry point
 ├── engine/         # Graph -> PCM (no features, just synthesis)
-│   └── backends/   # Kokoro, Piper, OpenAI, Coqui, Mock
+│   └── backends/   # Kokoro, Piper, OpenAI, Coqui, ElevenLabs, Azure, Mock
 ├── runtime/        # Streaming, timeline, ducking
 ├── adapters/       # CLI, public API (thin wrappers)
 ├── streaming/      # Incremental word-by-word synthesis
@@ -255,20 +259,24 @@ from voice_soundboard.graph import GRAPH_VERSION, ControlGraph
 assert GRAPH_VERSION == 1
 ```
 
-## Migration from v1
+## Migration
 
-The public API is unchanged:
+The public API is unchanged across all major versions:
 
 ```python
-# This works in both v1 and v2
+# This works in v1, v2, and v3
 from voice_soundboard import VoiceEngine
 engine = VoiceEngine()
 result = engine.speak("Hello!", voice="af_bella", emotion="happy")
 ```
 
-If you imported internals, see the migration mapping:
+### v2 → v3
 
-| v1 | v2 |
+v3 removes 11 speculative modules that shipped with zero test coverage (distributed, serverless, intelligence, analytics, monitoring, security, ambiance, scenes, spatial, mcp, v3-alpha). The public API is unchanged. If you imported removed internals, see [CHANGELOG.md](CHANGELOG.md#300---2026-03-19) for details.
+
+### v1 → v2
+
+| v1 | v2+ |
 |----|-----|
 | `engine.py` | `adapters/api.py` |
 | `emotions.py` | `compiler/emotion.py` |

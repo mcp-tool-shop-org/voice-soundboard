@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed — Production Scope Reduction
 Removed 11 modules that shipped with zero test coverage and no internal consumers.
-This reduces the installed package from 27 subpackages to 16, cutting ~40% of code surface.
+This reduces the installed package from 27 subpackages to 15, cutting ~44% of code surface.
 
 **Speculative modules (0 tests, never used):**
 - `distributed/` — Redis clustering, gRPC sharding
@@ -26,10 +26,15 @@ This reduces the installed package from 27 subpackages to 16, cutting ~40% of co
 - `mcp/` — MCP server integration (lives in [mcp-voice-soundboard](https://github.com/mcp-tool-shop-org/mcp-voice-soundboard))
 - `v3/` — Next-gen AudioGraph (will ship when ready, not as alpha inside v2)
 
-**Removed optional dependency groups:** `mcp`, `elevenlabs`, `azure`, `security`, `distributed`, `intelligence`, `mcp-server`
+**Removed optional dependency groups:** `mcp`, `security`, `distributed`, `intelligence`, `mcp-server`
+
+### Added
+- 225 new tests for Tier 2 modules (accessibility, conversation, realtime, plugins, speakers)
+- All 7 backends now supported in `load_backend()` and `list_backends()` (was 3)
+- Combined `docker.yml` + `publish.yml` into single `release.yml` workflow
 
 ### Fixed
-- `__version__` now matches pyproject.toml (was "2.6.0", now "2.6.3")
+- `__version__` now matches pyproject.toml (bumped to 3.0.0)
 - 227 lint violations fixed (120 unused imports, 17 unused vars, 3 undefined names)
 - CI lint step now enforces — violations break the build
 - CI dep-audit now enforces — known vulnerabilities break the build

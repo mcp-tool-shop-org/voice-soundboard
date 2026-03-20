@@ -60,8 +60,8 @@ Example:
     assertions = AudioAssertions(audio).assert_no_clipping()
 """
 
-__version__ = "2.6.3"
-API_VERSION = 2
+__version__ = "3.0.0"
+API_VERSION = 3
 
 # Public API - backwards compatible with v1
 from voice_soundboard.adapters.api import (  # noqa: E402
