@@ -43,6 +43,12 @@ coqui = [
 cloning = [
     "resemblyzer>=0.1.1",
 ]
+elevenlabs = [
+    "elevenlabs>=1.0.0",
+]
+azure = [
+    "azure-cognitiveservices-speech>=1.35.0",
+]
 dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
@@ -59,6 +65,8 @@ all = [
     "openai>=1.0.0",
     "TTS>=0.21.0",
     "resemblyzer>=0.1.1",
+    "elevenlabs>=1.0.0",
+    "azure-cognitiveservices-speech>=1.35.0",
 ]
 
 [project.scripts]
