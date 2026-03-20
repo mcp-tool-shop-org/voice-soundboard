@@ -5,8 +5,6 @@ Tests GraphCache and LRUCache for performance optimization.
 """
 
 import pytest
-import numpy as np
-import time
 from concurrent.futures import ThreadPoolExecutor
 
 from voice_soundboard.runtime.cache import GraphCache, LRUCache, CacheStats
@@ -83,9 +81,9 @@ class TestLRUCache:
         # If not, skip or check via internal
         
         try:
-             l = len(cache)
+             length = len(cache)
              cache.put("a", 1)
-             assert len(cache) == l + 1
+             assert len(cache) == length + 1
         except TypeError:
              # __len__ not implemented
              pass

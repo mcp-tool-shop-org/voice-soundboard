@@ -17,14 +17,11 @@ Default: Attempt MCP connection, fallback to subprocess, fallback to in-memory.
 from __future__ import annotations
 
 import json
-import os
 import subprocess
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from datetime import datetime
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
-from uuid import uuid4
 
 from .states import AudioState, StateID
 from .transitions import AudioTransition, TransitionResult, InvariantViolation, DecisionKind

@@ -5,21 +5,16 @@ Tests DebugInfo, GraphVisualizer, SynthesisProfiler, and diff_graphs.
 """
 
 import pytest
-import numpy as np
 import time
-from dataclasses import dataclass, field
-from typing import List
 
 from voice_soundboard.debug import (
     DebugInfo,
     visualize_graph,
-    profile_synthesis,
     diff_graphs,
 )
-from voice_soundboard.debug.info import DebugContext, TimingInfo
+from voice_soundboard.debug.info import DebugContext
 from voice_soundboard.debug.visualizer import GraphVisualizer
 from voice_soundboard.debug.profiler import SynthesisProfiler, ProfileReport
-from voice_soundboard.debug.diff import GraphDiff, FieldDiff
 from voice_soundboard.graph import ControlGraph, TokenEvent, SpeakerRef
 
 

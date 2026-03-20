@@ -12,13 +12,12 @@ If any test in this section fails → v2.8 must not ship.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock
 
 from voice_soundboard.runtime.registrar import (
     AudioRegistrar,
     StreamState,
     TransitionAction,
-    RegistrarError,
 )
 
 from .conftest import RegistrumTestHarness, RegistrarRequiredError
@@ -42,13 +41,6 @@ class TestMCPRegistrarIntegration:
         # MCP layer calls runtime to play audio
         # create_stream already uses START via registrar, putting stream in COMPILING
         stream_id = harness.create_stream(agent_id=agent)
-        
-        # Mock MCP tool call
-        mcp_request = {
-            "tool": "play_sound",
-            "arguments": {"stream_id": stream_id},
-            "actor": agent,
-        }
         
         # Runtime enforces registrar usage - direct calls must fail
         with pytest.raises(RegistrarRequiredError):

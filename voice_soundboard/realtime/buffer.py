@@ -13,7 +13,7 @@ from __future__ import annotations
 import threading
 import time
 from dataclasses import dataclass, field
-from typing import Iterator, Callable
+from typing import Iterator
 from collections import deque
 
 import numpy as np

@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Callable, TypeVar, Type, TYPE_CHECKING
+from typing import Any, TypeVar, Type, TYPE_CHECKING
 from enum import Enum
 import time
 

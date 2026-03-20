@@ -8,7 +8,7 @@ import pytest
 import tempfile
 from pathlib import Path
 import numpy as np
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from voice_soundboard.speakers.database import SpeakerDB, SpeakerEntry
 
@@ -75,8 +75,10 @@ class TestSpeakerDB:
                 )
             finally:
                 if dummy_path.exists():
-                    try: dummy_path.unlink()
-                    except: pass
+                    try:
+                        dummy_path.unlink()
+                    except Exception:
+                        pass
         
         entry = temp_db.get_entry("speaker1")
         
@@ -112,8 +114,10 @@ class TestSpeakerDB:
                     
             finally:
                 if dummy_path.exists():
-                    try: dummy_path.unlink()
-                    except: pass
+                    try:
+                        dummy_path.unlink()
+                    except Exception:
+                        pass
     
     def test_remove_nonexistent(self, temp_db):
         """Removing nonexistent speaker returns False."""
@@ -125,14 +129,17 @@ class TestSpeakerDB:
         with patch('voice_soundboard.speakers.database.extract_embedding') as mock_extract:
             mock_extract.return_value = sample_embedding
             dummy_path = Path("tests/dummy.wav")
-            if not dummy_path.exists(): dummy_path.touch()
+            if not dummy_path.exists():
+                dummy_path.touch()
             
             temp_db.add("speaker1", dummy_path, description="One")
             temp_db.add("speaker2", dummy_path, description="Two")
             temp_db.add("speaker3", dummy_path, description="Three")
             
-            try: dummy_path.unlink()
-            except: pass
+            try:
+                dummy_path.unlink()
+            except Exception:
+                pass
         
         speakers = temp_db.list()
         
@@ -147,7 +154,8 @@ class TestSpeakerDB:
         with patch('voice_soundboard.speakers.database.extract_embedding') as mock_extract:
             mock_extract.return_value = sample_embedding
             dummy_path = Path("tests/dummy.wav")
-            if not dummy_path.exists(): dummy_path.touch()
+            if not dummy_path.exists():
+                dummy_path.touch()
             
             # Using name field as the text field to match 'Smith'
             # Although 'name' argument in add is ID.
@@ -158,8 +166,10 @@ class TestSpeakerDB:
             temp_db.add("jane", dummy_path, description="Jane Doe")
             temp_db.add("bob", dummy_path, description="Bob Smith")
             
-            try: dummy_path.unlink()
-            except: pass
+            try:
+                dummy_path.unlink()
+            except Exception:
+                pass
         
         results = temp_db.search(query="Smith")
         
@@ -173,15 +183,18 @@ class TestSpeakerDB:
         with patch('voice_soundboard.speakers.database.extract_embedding') as mock_extract:
             mock_extract.return_value = sample_embedding
             dummy_path = Path("tests/dummy.wav")
-            if not dummy_path.exists(): dummy_path.touch()
+            if not dummy_path.exists():
+                dummy_path.touch()
             
             # tags list argument
             temp_db.add("narrator1", dummy_path, tags=["professional", "english"])
             temp_db.add("narrator2", dummy_path, tags=["casual", "english"])
             temp_db.add("narrator3", dummy_path, tags=["professional", "german"])
             
-            try: dummy_path.unlink()
-            except: pass
+            try:
+                dummy_path.unlink()
+            except Exception:
+                pass
         
         # argument name 'tags' (list)
         results = temp_db.search(tags=["professional"])
@@ -193,7 +206,8 @@ class TestSpeakerDB:
         with tempfile.TemporaryDirectory() as tmpdir:
             db_path = Path(tmpdir)
             dummy_path = Path("tests/dummy.wav")
-            if not dummy_path.exists(): dummy_path.touch()
+            if not dummy_path.exists():
+                dummy_path.touch()
             
             try:
                 # Create and populate
@@ -213,8 +227,10 @@ class TestSpeakerDB:
 
             finally:
                 if dummy_path.exists():
-                    try: dummy_path.unlink()
-                    except: pass
+                    try:
+                        dummy_path.unlink()
+                    except Exception:
+                        pass
     
     def test_update_speaker(self, temp_db, sample_embedding):
         """Update existing speaker."""
@@ -239,8 +255,10 @@ class TestSpeakerDB:
                 
             finally:
                 if dummy_path.exists():
-                    try: dummy_path.unlink()
-                    except: pass
+                    try:
+                        dummy_path.unlink()
+                    except Exception:
+                        pass
         
         entry = temp_db.get_entry("updatable")
         assert entry.description == "Updated Name"
@@ -250,7 +268,8 @@ class TestSpeakerDB:
         with patch('voice_soundboard.speakers.database.extract_embedding') as m:
             m.return_value = sample_embedding
             dummy_path = Path("tests/dummy.wav")
-            if not dummy_path.exists(): dummy_path.touch()
+            if not dummy_path.exists():
+                dummy_path.touch()
             
             assert len(temp_db) == 0
             
@@ -260,5 +279,7 @@ class TestSpeakerDB:
             temp_db.add("s2", dummy_path, description="Two")
             assert len(temp_db) == 2
             
-            try: dummy_path.unlink()
-            except: pass
+            try:
+                dummy_path.unlink()
+            except Exception:
+                pass

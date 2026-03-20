@@ -248,8 +248,8 @@ class AzureTTSBackend(BaseTTSBackend):
         synthesizer.synthesizing.connect(audio_callback)
         
         try:
-            result = synthesizer.speak_ssml_async(ssml).get()
-            
+            synthesizer.speak_ssml_async(ssml).get()
+
             # Yield remaining audio
             while len(audio_buffer) >= chunk_size * 2:
                 chunk = bytes(audio_buffer[:chunk_size * 2])
@@ -423,7 +423,7 @@ class AzureTTSBackend(BaseTTSBackend):
 
 # Check availability
 try:
-    import azure.cognitiveservices.speech as _azure_check
+    import azure.cognitiveservices.speech as _azure_check  # noqa: F401
     AZURE_AVAILABLE = True
 except ImportError:
     AZURE_AVAILABLE = False

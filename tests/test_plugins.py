@@ -3,7 +3,6 @@ Tests for v2.4 plugin system.
 """
 
 import pytest
-from unittest.mock import Mock
 
 from voice_soundboard.plugins import (
     Plugin, 

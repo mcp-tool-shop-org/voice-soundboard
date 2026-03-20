@@ -11,7 +11,6 @@ Required Tests:
 If any test in this section fails → v2.8 must not ship.
 """
 
-import pytest
 
 from voice_soundboard.runtime.registrar import (
     AudioRegistrar,
@@ -75,14 +74,14 @@ class TestReplayDeterminism:
         harness.advance_stream(stream_id, StreamState.PLAYING)
         
         # Non-owner denial
-        denial_result = registrar.request(
+        registrar.request(
             action=TransitionAction.INTERRUPT,
             actor=agent_b,
             target=stream_id,
         )
         
         # Owner allow
-        allow_result = registrar.request(
+        registrar.request(
             action=TransitionAction.INTERRUPT,
             actor=agent_a,
             target=stream_id,
@@ -144,7 +143,7 @@ class TestReplayDeterminism:
             wrong_order[0], wrong_order[1] = wrong_order[1], wrong_order[0]
             
             wrong_replay = registrar.replay(wrong_order)
-            wrong_state = wrong_replay.get_state(stream_id)
+            wrong_replay.get_state(stream_id)
             
             # Either fails or produces different state
             # (implementation-dependent - may reject invalid sequence)

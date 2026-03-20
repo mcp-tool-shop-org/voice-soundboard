@@ -12,14 +12,12 @@ If any test in this section fails → v2.8 must not ship.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-import time
+from unittest.mock import patch
 
 from voice_soundboard.runtime.registrar import (
     AudioRegistrar,
     StreamState,
     TransitionAction,
-    RegistrarError,
 )
 
 from .conftest import RegistrumTestHarness
@@ -75,9 +73,9 @@ class TestFailureAndRecovery:
         harness.advance_stream(stream_id, StreamState.SYNTHESIZING)
         harness.advance_stream(stream_id, StreamState.PLAYING)
         
-        # Store original state
-        original_state = registrar.get_state(stream_id)
-        
+        # Store original state (used for crash recovery verification)
+        registrar.get_state(stream_id)
+
         # Simulate crash during state computation
         with patch.object(
             registrar,

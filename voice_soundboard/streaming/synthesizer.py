@@ -32,7 +32,7 @@ from typing import Iterator, Callable, Any
 
 import numpy as np
 
-from voice_soundboard.graph import ControlGraph, TokenEvent, SpeakerRef
+from voice_soundboard.graph import ControlGraph
 from voice_soundboard.compiler import compile_request
 from voice_soundboard.engine import TTSBackend
 

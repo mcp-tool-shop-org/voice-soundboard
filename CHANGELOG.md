@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-03-19
+
+### Removed — Production Scope Reduction
+Removed 11 modules that shipped with zero test coverage and no internal consumers.
+This reduces the installed package from 27 subpackages to 16, cutting ~40% of code surface.
+
+**Speculative modules (0 tests, never used):**
+- `distributed/` — Redis clustering, gRPC sharding
+- `serverless/` — AWS Lambda, GCP Functions, Azure Functions stubs
+- `intelligence/` — Emotion detection, adaptive pacing (incomplete)
+- `analytics/` — Usage tracking, cost attribution (empty stubs)
+- `monitoring/` — Health checks, metrics (boilerplate)
+- `security/` — Plugin sandboxing via RestrictedPython (never dogfooded)
+- `ambiance/` — Procedural noise generation (not TTS)
+- `scenes/` — Multi-layer audio composition (DAW feature, not TTS)
+- `spatial/` — 3D audio positioning (game engine feature, not TTS)
+
+**Extracted to dedicated repos:**
+- `mcp/` — MCP server integration (lives in [mcp-voice-soundboard](https://github.com/mcp-tool-shop-org/mcp-voice-soundboard))
+- `v3/` — Next-gen AudioGraph (will ship when ready, not as alpha inside v2)
+
+**Removed optional dependency groups:** `mcp`, `elevenlabs`, `azure`, `security`, `distributed`, `intelligence`, `mcp-server`
+
+### Fixed
+- `__version__` now matches pyproject.toml (was "2.6.0", now "2.6.3")
+- 227 lint violations fixed (120 unused imports, 17 unused vars, 3 undefined names)
+- CI lint step now enforces — violations break the build
+- CI dep-audit now enforces — known vulnerabilities break the build
+- CI and Makefile use aligned test ignore lists
+- Removed stale `validate-assets` CI job (3 jobs, down from 4)
+
+### Changed
+- README package structure updated to reflect actual shipped modules
+
 ## [2.6.3] - 2026-02-27
 
 ### Added

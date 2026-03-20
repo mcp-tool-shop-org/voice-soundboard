@@ -16,9 +16,6 @@ import pytest
 import ast
 import re
 from pathlib import Path
-from typing import List, Set, Tuple
-import subprocess
-import sys
 
 
 # ============================================================================
@@ -66,23 +63,7 @@ class TestRegressionGuard:
     
     def test_ci_configuration_runs_tests(self):
         """CI must run this suite on every PR"""
-        # Check for common CI configuration files
-        ci_files = [
-            Path(".github/workflows"),
-            Path(".circleci"),
-            Path(".travis.yml"),
-            Path("azure-pipelines.yml"),
-            Path("Jenkinsfile"),
-            Path(".gitlab-ci.yml"),
-        ]
-        
-        found_ci = False
-        for ci_path in ci_files:
-            if ci_path.exists():
-                found_ci = True
-                break
-        
-        # For now, just verify test infrastructure exists
+        # CI check: at least verify test infrastructure exists
         test_path = Path("tests/registrum")
         assert test_path.exists(), "Test directory must exist"
         
@@ -132,12 +113,12 @@ class TestRegressionGuard:
                         if any(re.search(pattern, content) for pattern in FORBIDDEN_RUNTIME_METHODS):
                             violations.append(f"{py_file}: Uses AudioRuntime without Registrar")
                 
-                except Exception as e:
+                except Exception:
                     # Skip files that can't be read
                     continue
         
         if violations:
-            pytest.fail(f"Lint violations:\n" + "\n".join(violations))
+            pytest.fail("Lint violations:\n" + "\n".join(violations))
     
     # =========================================================================
     # Test 3: Static analysis: direct state mutation is flagged
@@ -168,11 +149,11 @@ class TestRegressionGuard:
                                 f"{py_file}:{line_num}: Direct state mutation: {match.group()}"
                             )
                 
-                except Exception as e:
+                except Exception:
                     continue
         
         if violations:
-            pytest.fail(f"Direct state mutations found:\n" + "\n".join(violations))
+            pytest.fail("Direct state mutations found:\n" + "\n".join(violations))
     
     # =========================================================================
     # Helper methods
@@ -220,7 +201,7 @@ class TestStaticAnalysis:
                     continue
         
         if violations:
-            pytest.fail(f"Bypass patterns found:\n" + "\n".join(violations))
+            pytest.fail("Bypass patterns found:\n" + "\n".join(violations))
     
     def test_registrar_is_not_optional(self):
         """Registrar usage is not optional in runtime code"""
@@ -265,7 +246,7 @@ class TestStaticAnalysis:
         # Note: Some optionality may be valid for testing
         # This test serves as a warning
         if violations:
-            print(f"Warning - Optional registrar patterns:\n" + "\n".join(violations))
+            print("Warning - Optional registrar patterns:\n" + "\n".join(violations))
 
 
 class TestASTAnalysis:
@@ -306,7 +287,7 @@ class TestASTAnalysis:
                     continue
         
         if violations:
-            pytest.fail(f"Direct state assignments:\n" + "\n".join(violations))
+            pytest.fail("Direct state assignments:\n" + "\n".join(violations))
 
 
 class TestInvariantLocking:

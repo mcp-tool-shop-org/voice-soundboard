@@ -22,13 +22,11 @@ State Machine:
 If any test in this section fails → v2.8 must not ship.
 """
 
-import pytest
 
 from voice_soundboard.runtime.registrar import (
     AudioRegistrar,
     StreamState,
     TransitionAction,
-    TransitionResult,
 )
 
 from .conftest import RegistrumTestHarness
@@ -111,7 +109,7 @@ class TestLifecycleOrdering:
         stream_id = harness.create_stream(agent_id=agent)
         
         # Force into FAILED state
-        result = registrar.request(
+        registrar.request(
             action=TransitionAction.FAIL,
             actor=agent,
             target=stream_id,

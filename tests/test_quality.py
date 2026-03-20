@@ -14,7 +14,6 @@ from voice_soundboard.quality import (
     evaluate_naturalness,
     VoiceComparison,
     compare_voices,
-    ABTestResult,
 )
 from voice_soundboard.quality.metrics import QualityLevel, NaturalnessScore
 from voice_soundboard.quality.comparison import ab_test, detect_regression, ComparisonResult

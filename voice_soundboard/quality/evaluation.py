@@ -4,7 +4,7 @@ Quality evaluation functions.
 Provides functions to evaluate different aspects of voice quality.
 """
 
-from typing import Optional, List, Dict
+from typing import Optional, List
 import numpy as np
 
 from voice_soundboard.quality.metrics import (

@@ -6,7 +6,7 @@ Provides format detection and conversion between audio formats.
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional, Dict, Any, BinaryIO, Union
+from typing import Optional, Dict, Any, Union
 from pathlib import Path
 import struct
 import io
@@ -262,7 +262,7 @@ class FormatConverter:
         if riff != b"RIFF":
             raise ValueError("Invalid WAV: missing RIFF")
         
-        file_size = struct.unpack("<I", buffer.read(4))[0]
+        struct.unpack("<I", buffer.read(4))  # file_size (unused, skip)
         wave = buffer.read(4)
         if wave != b"WAVE":
             raise ValueError("Invalid WAV: missing WAVE")
@@ -282,7 +282,7 @@ class FormatConverter:
             
             if chunk_id == b"fmt ":
                 fmt_data = buffer.read(chunk_size)
-                audio_format = struct.unpack("<H", fmt_data[0:2])[0]
+                struct.unpack("<H", fmt_data[0:2])  # audio_format (unused)
                 channels = struct.unpack("<H", fmt_data[2:4])[0]
                 sample_rate = struct.unpack("<I", fmt_data[4:8])[0]
                 # byte_rate = struct.unpack("<I", fmt_data[8:12])[0]

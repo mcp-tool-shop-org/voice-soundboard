@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field, asdict
-from typing import Any, Optional
+from typing import Any
 from contextlib import contextmanager
 
 
@@ -122,12 +122,12 @@ class DebugInfo:
             f"Synth:    {self.synth_time_ms:6.1f}ms",
             f"I/O:      {self.io_time_ms:6.1f}ms",
             f"Total:    {self.total_time_ms:6.1f}ms",
-            f"",
+            "",
             f"Tokens:   {self.graph_tokens}",
             f"Events:   {self.graph_events}",
             f"Backend:  {self.backend}",
             f"Cache:    {'HIT' if self.cache_hit else 'MISS'}",
-            f"",
+            "",
             f"Audio:    {self.audio_duration_ms:.1f}ms ({self.audio_samples} samples)",
             f"RTF:      {self.realtime_factor:.1f}x",
         ]

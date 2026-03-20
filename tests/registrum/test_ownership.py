@@ -14,7 +14,6 @@ Required Tests:
 If any test in this section fails → v2.8 must not ship.
 """
 
-import pytest
 
 from voice_soundboard.runtime.registrar import (
     AudioRegistrar,

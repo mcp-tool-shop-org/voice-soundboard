@@ -148,12 +148,8 @@ class VoiceOverAdapter(ScreenReaderAdapter):
             vo_rate = int(50 * rate)
             vo_rate = max(1, min(100, vo_rate))
             
-            script = f'''
-            tell application "System Preferences"
-                reveal anchor "Accessibility" of pane id "com.apple.preference.universalaccess"
-            end tell
-            '''
             # Note: Actually changing rate requires accessibility permissions
+            # AppleScript would be needed here but requires elevated permissions
             # This is a simplified placeholder
         except Exception:
             pass

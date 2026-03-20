@@ -2,17 +2,14 @@
 Tests for v2.3 realtime module.
 """
 
-import pytest
 import numpy as np
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 
 from voice_soundboard.realtime import (
     RealtimeConfig,
     BackpressurePolicy,
-    DropPolicy,
     RealtimeBuffer,
     RealtimeEngine,
-    RealtimeSession,
 )
 
 
@@ -64,7 +61,8 @@ class TestRealtimeBuffer:
         
         def read_n(n):
             chunks = list(buffer.read_chunks(chunk_size=n))
-            if not chunks: return []
+            if not chunks:
+                return []
             return chunks[0]
             
         read_n(3)
@@ -103,7 +101,7 @@ class TestRealtimeEngine:
         mock_backend.synthesize.return_value = (np.zeros(100, dtype=np.float32) for _ in range(1))
         
         engine = RealtimeEngine(mock_backend)
-        with engine.session() as session:
+        with engine.session():
             # Session is auto-started by context manager
             pass
         # Session auto-stopped on exit

@@ -360,7 +360,7 @@ class PiperBackend(BaseTTSBackend):
 def is_available() -> bool:
     """Check if Piper backend is available."""
     try:
-        from piper import PiperVoice
+        from piper import PiperVoice  # noqa: F401
         return True
     except ImportError:
         return False

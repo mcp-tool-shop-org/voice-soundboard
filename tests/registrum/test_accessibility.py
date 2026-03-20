@@ -16,16 +16,12 @@ Required Tests:
 If any test in this section fails → v2.8 must not ship.
 """
 
-import pytest
 
 from voice_soundboard.runtime.registrar import (
     AudioRegistrar,
     StreamState,
     TransitionAction,
-    TransitionResult,
 )
-from voice_soundboard.runtime.registrar.errors import AccessibilityBypassError
-from voice_soundboard.runtime.registrar.states import AccessibilityState
 
 from .conftest import RegistrumTestHarness
 
@@ -205,7 +201,7 @@ class TestAccessibilitySupremacy:
         assert state1.accessibility.override_active is True
         
         # Stream 2 (different session) should not be affected by session scope
-        state2 = registrar.get_state(stream_id2)
+        registrar.get_state(stream_id2)
         # Session-scoped override only applies to that session
         # (implementation-dependent)
 
@@ -251,7 +247,7 @@ class TestAccessibilitySafety:
         harness.advance_stream(stream_id, StreamState.PLAYING)
         
         # Enable override
-        override_result = registrar.request(
+        registrar.request(
             action=TransitionAction.ENABLE_OVERRIDE,
             actor=user,
             target=stream_id,
@@ -372,7 +368,7 @@ class TestAccessibilityAuditability:
         )
         
         # Agent blocked
-        decision = registrar.request(
+        registrar.request(
             action=TransitionAction.INTERRUPT,
             actor=agent,
             target=stream_id,

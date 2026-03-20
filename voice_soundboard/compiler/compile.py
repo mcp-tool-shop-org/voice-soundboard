@@ -14,11 +14,11 @@ from __future__ import annotations
 
 from typing import Iterator
 
-from voice_soundboard.graph import ControlGraph, TokenEvent, SpeakerRef
+from voice_soundboard.graph import ControlGraph, SpeakerRef
 from voice_soundboard.compiler.text import tokenize, tokenize_streaming
 from voice_soundboard.compiler.emotion import apply_emotion, get_emotion
 from voice_soundboard.compiler.style import apply_style, suggest_voice_from_style
-from voice_soundboard.compiler.voices import PRESETS, VOICES
+from voice_soundboard.compiler.voices import PRESETS
 
 
 def compile_request(

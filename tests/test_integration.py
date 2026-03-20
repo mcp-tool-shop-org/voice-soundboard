@@ -1,6 +1,5 @@
 """Integration tests - verify the full pipeline works."""
 
-import pytest
 from pathlib import Path
 import tempfile
 

@@ -15,13 +15,11 @@ Design principles:
 - Each test is a regression lock
 """
 
-import pytest
 
 from voice_soundboard.runtime.timeline import (
     Event,
     Token,
     Pause,
-    StreamItem,
     stream_timeline,
     total_duration_ms,
 )

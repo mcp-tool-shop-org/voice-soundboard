@@ -335,7 +335,7 @@ class ElevenLabsBackend(BaseTTSBackend):
 
 # Check availability
 try:
-    from elevenlabs import ElevenLabs as _ElevenLabsCheck
+    from elevenlabs import ElevenLabs as _ElevenLabsCheck  # noqa: F401
     ELEVENLABS_AVAILABLE = True
 except ImportError:
     ELEVENLABS_AVAILABLE = False

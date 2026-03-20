@@ -12,6 +12,7 @@ from typing import Optional, Type
 
 from voice_soundboard.accessibility.screen_readers.base import (
     ScreenReaderAdapter,
+    ScreenReaderMode,
     NullScreenReaderAdapter,
 )
 
@@ -89,7 +90,7 @@ def get_available_adapters() -> list[Type[ScreenReaderAdapter]]:
     return adapters
 
 
-def get_adapter_for_mode(mode: "ScreenReaderMode") -> Optional[ScreenReaderAdapter]:
+def get_adapter_for_mode(mode: ScreenReaderMode) -> Optional[ScreenReaderAdapter]:
     """Get a specific adapter by mode.
     
     Args:
@@ -98,8 +99,6 @@ def get_adapter_for_mode(mode: "ScreenReaderMode") -> Optional[ScreenReaderAdapt
     Returns:
         Adapter instance or None if not available
     """
-    from voice_soundboard.accessibility.screen_readers.base import ScreenReaderMode
-    
     if mode == ScreenReaderMode.AUTO:
         return detect_screen_reader()
     

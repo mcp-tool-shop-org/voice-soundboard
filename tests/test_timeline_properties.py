@@ -12,16 +12,13 @@ Invariants tested:
     5. Event atomicity - events appear whole in output
 """
 
-import pytest
-from hypothesis import given, strategies as st, settings, assume
+from hypothesis import given, strategies as st, settings
 
 from voice_soundboard.runtime.timeline import (
     Event,
     Token,
     Pause,
-    StreamItem,
     stream_timeline,
-    total_duration_ms,
     validate_no_overlap,
 )
 

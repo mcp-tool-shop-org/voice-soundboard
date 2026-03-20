@@ -22,7 +22,6 @@ from voice_soundboard.realtime.config import (
     RealtimeConfig,
     SessionConfig,
     BackpressurePolicy,
-    DropPolicy,
 )
 from voice_soundboard.realtime.buffer import RealtimeBuffer, RollbackMarker
 
@@ -245,7 +244,7 @@ class RealtimeSession:
                     
                     self._state = SessionState.IDLE
             
-            except Exception as e:
+            except Exception:
                 # Rollback on error
                 if self._current_marker and not self._current_marker.committed:
                     self._engine._buffer.rollback(self._current_marker)

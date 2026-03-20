@@ -167,7 +167,7 @@ class KokoroBackend(BaseTTSBackend):
 def is_available() -> bool:
     """Check if Kokoro backend is available."""
     try:
-        from kokoro_onnx import Kokoro
+        from kokoro_onnx import Kokoro  # noqa: F401
         return True
     except ImportError:
         return False

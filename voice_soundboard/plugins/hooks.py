@@ -4,9 +4,8 @@ Hook system for plugin event handling.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable, Any, TypeVar, ParamSpec, Union
-from functools import wraps
 from enum import Enum, auto
 import threading
 

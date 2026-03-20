@@ -12,8 +12,7 @@ If any test in this section fails → v2.8 must not ship.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from typing import Optional
+from unittest.mock import Mock
 
 from voice_soundboard.runtime.registrar import (
     AudioRegistrar,
@@ -144,9 +143,9 @@ class TestPluginDirectAccessPrevention:
         """Plugin cannot directly change state"""
         stream_id = harness.create_stream(agent_id=agent)
         harness.advance_stream(stream_id, StreamState.PLAYING)
-        
-        plugin = MockPlugin()
-        
+
+        MockPlugin()
+
         # Direct state mutation blocked
         with pytest.raises(RegistrarRequiredError):
             runtime.set_stream_state(stream_id, StreamState.STOPPED)
@@ -161,9 +160,9 @@ class TestPluginDirectAccessPrevention:
         """Plugin cannot directly interrupt"""
         stream_id = harness.create_stream(agent_id=agent)
         harness.advance_stream(stream_id, StreamState.PLAYING)
-        
-        plugin = MockPlugin()
-        
+
+        MockPlugin()
+
         with pytest.raises(RegistrarRequiredError):
             runtime.interrupt_audio_direct(stream_id)
     
@@ -272,12 +271,12 @@ class TestPluginDenialReporting:
         stream_id = harness.create_stream(agent_id=agent)
         harness.advance_stream(stream_id, StreamState.PLAYING)
         
-        result = registrar.request(
+        registrar.request(
             action=TransitionAction.INTERRUPT,
             actor=plugin.plugin_id,
             target=stream_id,
         )
-        
+
         # Denial attested
         attestations = harness.get_attestations()
         denial_atts = [

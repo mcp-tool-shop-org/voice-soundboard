@@ -2,8 +2,7 @@
 Tests for v2.3 conversation module.
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 import numpy as np
 
 from voice_soundboard.conversation import (

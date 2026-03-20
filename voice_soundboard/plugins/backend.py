@@ -10,7 +10,7 @@ from typing import Iterator
 import numpy as np
 
 from voice_soundboard.graph import ControlGraph
-from voice_soundboard.engine.base import TTSBackend, BaseTTSBackend
+from voice_soundboard.engine.base import BaseTTSBackend
 from voice_soundboard.plugins.base import Plugin, PluginType
 
 

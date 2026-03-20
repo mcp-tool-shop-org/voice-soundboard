@@ -24,9 +24,9 @@ from __future__ import annotations
 import concurrent.futures
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Iterator, Any
+from typing import Callable, Iterator
 
 import numpy as np
 

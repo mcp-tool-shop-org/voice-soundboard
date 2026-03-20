@@ -248,7 +248,7 @@ def benchmark_synthesis(
     times = []
     for _ in range(iterations):
         start = time.perf_counter()
-        result = engine.speak(text)
+        engine.speak(text)
         elapsed = (time.perf_counter() - start) * 1000
         times.append(elapsed)
     

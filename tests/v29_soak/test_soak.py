@@ -22,8 +22,7 @@ import statistics
 import gc
 from concurrent.futures import ThreadPoolExecutor, wait
 from dataclasses import dataclass, field
-from typing import List, Dict, Any
-from uuid import uuid4
+from typing import List, Dict
 
 from voice_soundboard.runtime.registrar import (
     AudioRegistrar,
@@ -246,7 +245,7 @@ class TestLongRunningSoak:
             latency = (time.time() - start) * 1000
             metrics.record_request(latency, success=True)
             
-        except Exception as e:
+        except Exception:
             latency = (time.time() - start) * 1000
             metrics.record_request(latency, success=False)
 

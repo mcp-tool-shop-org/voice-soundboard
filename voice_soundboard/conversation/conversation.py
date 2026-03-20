@@ -9,8 +9,8 @@ from typing import Any, Iterator, Sequence
 
 import numpy as np
 
-from voice_soundboard.conversation.speaker import Speaker, SpeakerStyle
-from voice_soundboard.conversation.turn import Turn, TurnType, Timeline
+from voice_soundboard.conversation.speaker import Speaker
+from voice_soundboard.conversation.turn import Turn, Timeline
 
 
 @dataclass

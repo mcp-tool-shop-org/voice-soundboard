@@ -6,7 +6,6 @@ Tests BatchSynthesizer for processing multiple items efficiently.
 
 import pytest
 import numpy as np
-import time
 from pathlib import Path
 import tempfile
 from unittest.mock import MagicMock
@@ -156,7 +155,7 @@ class TestBatchSynthesizer:
         with tempfile.TemporaryDirectory() as tmpdir:
             output_dir = Path(tmpdir)
             
-            result = batch_synth.synthesize(texts, voice="af_bella", output_dir=output_dir)
+            batch_synth.synthesize(texts, voice="af_bella", output_dir=output_dir)
             
             # Check files were created (mock backend might not write files? 
             # Wait, synthesize function writes files if audio is present)

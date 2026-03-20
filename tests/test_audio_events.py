@@ -1,7 +1,6 @@
 """Tests for the audio event adapter."""
 
 import json
-import struct
 import tempfile
 import wave
 from pathlib import Path

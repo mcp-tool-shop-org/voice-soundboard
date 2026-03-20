@@ -5,7 +5,7 @@ Provides LUFS-based loudness measurement and normalization.
 """
 
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Tuple
 import numpy as np
 
 
@@ -149,7 +149,6 @@ def _gated_loudness(
     """
     # Block sizes
     momentary_size = int(sample_rate * 0.4)   # 400ms
-    short_term_size = int(sample_rate * 3.0)  # 3s
     hop_size = int(sample_rate * 0.1)         # 100ms overlap
     
     if len(audio) < momentary_size:

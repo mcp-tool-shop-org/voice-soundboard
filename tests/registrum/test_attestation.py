@@ -12,11 +12,9 @@ Required Tests:
 If any test in this section fails → v2.8 must not ship.
 """
 
-import pytest
 
 from voice_soundboard.runtime.registrar import (
     AudioRegistrar,
-    Attestation,
     StreamState,
     TransitionAction,
 )
@@ -90,8 +88,8 @@ class TestAttestationCompleteness:
         agent: str,
     ):
         """Attestation IDs are unique and valid"""
-        stream1 = harness.create_stream(agent_id=agent)
-        stream2 = harness.create_stream(agent_id=agent)
+        harness.create_stream(agent_id=agent)
+        harness.create_stream(agent_id=agent)
         
         attestations = harness.get_attestations()
         ids = [a.id for a in attestations]
@@ -317,8 +315,8 @@ class TestAttestationQuerying:
         agent_b: str,
     ):
         """Can query attestations by actor"""
-        stream1 = harness.create_stream(agent_id=agent_a)
-        stream2 = harness.create_stream(agent_id=agent_b)
+        harness.create_stream(agent_id=agent_a)
+        harness.create_stream(agent_id=agent_b)
         
         # Query by actor
         agent_a_atts = registrar.attestation_store.query(actor=agent_a)

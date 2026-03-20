@@ -83,17 +83,17 @@ class AuditReport:
     def to_markdown(self) -> str:
         """Export report as markdown."""
         lines = [
-            f"# Accessibility Audit Report",
-            f"",
+            "# Accessibility Audit Report",
+            "",
             f"**Standard:** {self.standard}",
             f"**Result:** {'PASS' if self.is_compliant else 'FAIL'}",
-            f"",
-            f"| Passed | Warnings | Failed |",
-            f"|--------|----------|--------|",
+            "",
+            "| Passed | Warnings | Failed |",
+            "|--------|----------|--------|",
             f"| {self.passed} | {self.warnings} | {self.failed} |",
-            f"",
-            f"## Details",
-            f"",
+            "",
+            "## Details",
+            "",
         ]
         
         for result in self.results:

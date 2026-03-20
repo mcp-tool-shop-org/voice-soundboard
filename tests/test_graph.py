@@ -1,6 +1,5 @@
 """Tests for the graph module."""
 
-import pytest
 from voice_soundboard.graph import (
     GRAPH_VERSION,
     ControlGraph,

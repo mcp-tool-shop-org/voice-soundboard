@@ -10,7 +10,6 @@ Registers markers for:
     - replay: replay tests
 """
 
-import pytest
 
 
 def pytest_configure(config):

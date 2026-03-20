@@ -11,11 +11,9 @@ Provides:
 
 from __future__ import annotations
 
-import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
-from datetime import datetime
 from typing import Any, Callable
 from uuid import uuid4
 
@@ -24,20 +22,14 @@ import pytest
 from voice_soundboard.runtime.registrar import (
     AudioRegistrar,
     Attestation,
-    AttestationStore,
     StreamState,
-    StreamOwnership,
-    AudioState,
     TransitionAction,
     TransitionRequest,
     TransitionResult,
 )
 from voice_soundboard.runtime.registrar.transitions import DecisionKind
-from voice_soundboard.runtime.registrar.bridge import RegistrumBridge, RegistrumConfig
+from voice_soundboard.runtime.registrar.bridge import RegistrumConfig
 from voice_soundboard.runtime.registrar.errors import (
-    AccessibilityBypassError,
-    InvariantViolationError,
-    OwnershipError,
     RegistrarError,
 )
 

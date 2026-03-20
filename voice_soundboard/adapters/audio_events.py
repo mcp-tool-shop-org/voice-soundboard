@@ -206,7 +206,7 @@ class AudioEventAdapter:
         issues = manifest.validate()
         
         if issues:
-            raise ValueError(f"Manifest validation failed:\n" + "\n".join(issues))
+            raise ValueError("Manifest validation failed:\n" + "\n".join(issues))
         
         return cls(manifest)
     

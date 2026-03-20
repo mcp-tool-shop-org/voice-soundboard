@@ -27,7 +27,7 @@ import threading
 import time
 from collections import OrderedDict
 from dataclasses import dataclass, field
-from typing import Any, TypeVar, Generic, Callable
+from typing import TypeVar, Generic, Callable
 
 from voice_soundboard.graph import ControlGraph
 

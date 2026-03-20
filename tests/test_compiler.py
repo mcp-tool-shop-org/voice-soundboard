@@ -1,6 +1,5 @@
 """Tests for the compiler module."""
 
-import pytest
 from voice_soundboard.compiler import (
     compile_request,
     tokenize,

@@ -1,8 +1,7 @@
 """Tests for the incremental compiler."""
 
-import pytest
 from voice_soundboard.compiler import IncrementalCompiler, compile_incremental
-from voice_soundboard.graph import ControlGraph, Paralinguistic
+from voice_soundboard.graph import Paralinguistic
 
 
 class TestIncrementalCompiler:

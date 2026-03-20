@@ -6,7 +6,6 @@ Provides high-quality sample rate conversion for audio.
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 import numpy as np
 
 

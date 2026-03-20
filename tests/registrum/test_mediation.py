@@ -21,10 +21,6 @@ from voice_soundboard.runtime.registrar import (
     StreamState,
     TransitionAction,
 )
-from voice_soundboard.runtime.registrar.errors import (
-    AccessibilityBypassError,
-    RegistrarError,
-)
 
 from .conftest import (
     RegistrarRequiredError,
@@ -277,8 +273,6 @@ class TestMediationInvariants:
         assert state is not None
         
         # AudioState is a dataclass - verify it resists direct mutation
-        original_state = state.state
-        
         # This depends on whether AudioState is frozen
         # Either way, no attestation = violation
         initial_count = registrar.attestation_store.count()

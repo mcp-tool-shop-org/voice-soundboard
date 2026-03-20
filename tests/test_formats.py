@@ -4,12 +4,9 @@ Tests for v2.3 formats module.
 
 import pytest
 import numpy as np
-from pathlib import Path
-import tempfile
 
 from voice_soundboard.formats import (
     convert_sample_rate,
-    SampleRateConverter,
     ResamplingQuality,
     normalize_loudness,
     measure_loudness,
@@ -20,7 +17,6 @@ from voice_soundboard.formats import (
     convert_format,
     detect_format,
     FormatCapabilities,
-    FormatNegotiator,
     negotiate_format,
 )
 from voice_soundboard.formats.negotiation import NegotiationStrategy, CAPABILITIES_MINIMAL, CAPABILITIES_FULL

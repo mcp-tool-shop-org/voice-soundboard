@@ -10,8 +10,6 @@ Features:
 from __future__ import annotations
 
 import time
-import struct
-import math
 from dataclasses import dataclass, field
 from typing import Any
 

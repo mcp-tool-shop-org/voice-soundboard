@@ -23,7 +23,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from voice_soundboard.cloning.extractor import EmbeddingFormat, EmbeddingResult
+from voice_soundboard.cloning.extractor import EmbeddingResult
 
 logger = logging.getLogger(__name__)
 
@@ -192,7 +192,7 @@ def load_embedding(path: Path | str) -> list[float]:
         data = json.load(f)
     
     if "embedding" not in data:
-        raise ValueError(f"Invalid embedding file: missing 'embedding' field")
+        raise ValueError("Invalid embedding file: missing 'embedding' field")
     
     return data["embedding"]
 

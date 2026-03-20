@@ -22,7 +22,6 @@ import logging
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 
@@ -203,8 +202,8 @@ class EmbeddingExtractor:
     def _extract_coqui(self, audio: np.ndarray, sr: int) -> np.ndarray:
         """Extract embedding using Coqui speaker encoder."""
         try:
-            from TTS.utils.audio import AudioProcessor
-            from TTS.encoder.utils.generic_utils import setup_encoder_model
+            from TTS.utils.audio import AudioProcessor  # noqa: F401
+            from TTS.encoder.utils.generic_utils import setup_encoder_model  # noqa: F401
             
             # This would require a trained encoder model
             # For now, fall back to mel
