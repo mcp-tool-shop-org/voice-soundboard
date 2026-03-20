@@ -30,7 +30,7 @@ jobs:
       - name: "Step: import-library"
         id: import_library
         run: |
-          python -c "from voice_soundboard.compiler import Compiler; print('import ok')" | tee /tmp/import.log
+          python -c "from voice_soundboard.compiler import compile; print('import ok')" 2>&1 | tee /tmp/import.log
           if [ $? -eq 0 ]; then
             echo "status=pass" >> "$GITHUB_OUTPUT"
           else
