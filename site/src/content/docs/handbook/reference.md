@@ -47,21 +47,27 @@ List all available presets:
 voice-soundboard presets
 ```
 
-## Migration from v1
+## Migration
 
-The public API is unchanged between v1 and v2:
+The public API is unchanged across all major versions:
 
 ```python
-# This works in both v1 and v2
+# This works in v1, v2, and v3
 from voice_soundboard import VoiceEngine
 
 engine = VoiceEngine()
 result = engine.speak("Hello!", voice="af_bella", emotion="happy")
 ```
 
+### v2 to v3
+
+v3 removes 11 speculative modules that shipped with zero test coverage (distributed, serverless, intelligence, analytics, monitoring, security, ambiance, scenes, spatial, mcp, v3-alpha). The public API is unchanged. If you imported removed internals, see the [CHANGELOG](https://github.com/mcp-tool-shop-org/voice-soundboard/blob/main/CHANGELOG.md) for details.
+
+### v1 to v2
+
 If you imported internal modules, use this migration mapping:
 
-| v1 | v2 |
+| v1 | v2+ |
 |----|-----|
 | `engine.py` | `adapters/api.py` |
 | `emotions.py` | `compiler/emotion.py` |

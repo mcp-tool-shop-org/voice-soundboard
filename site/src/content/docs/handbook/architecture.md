@@ -88,7 +88,18 @@ voice_soundboard/
 │   ├── style.py    # Natural language style
 │   └── compile.py  # Main entry point
 ├── engine/         # Graph -> PCM (no features, just synthesis)
-│   └── backends/   # Kokoro, Piper, Mock
-├── runtime/        # Streaming, scheduling
-└── adapters/       # CLI, API, MCP (thin wrappers)
+│   └── backends/   # Kokoro, Piper, OpenAI, Coqui, ElevenLabs, Azure, Mock
+├── runtime/        # Streaming, timeline, ducking, batch, cache
+├── adapters/       # CLI, public API (thin wrappers)
+├── streaming/      # Incremental word-by-word synthesis
+├── conversation/   # Multi-speaker dialogue
+├── cloning/        # Speaker embedding extraction
+├── speakers/       # Speaker database
+├── realtime/       # Low-latency streaming engine
+├── plugins/        # Plugin architecture
+├── quality/        # Voice quality metrics
+├── formats/        # Audio format conversion, LUFS
+├── debug/          # Graph visualization, profiler
+├── testing/        # VoiceMock, AudioAssertions
+└── accessibility/  # Screen reader integration, captions
 ```
